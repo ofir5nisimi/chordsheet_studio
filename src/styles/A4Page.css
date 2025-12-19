@@ -1,0 +1,285 @@
+/**
+ * A4 Page Styles
+ * A4 dimensions: 210mm x 297mm (aspect ratio 1:1.414)
+ * Using pixels: 794px x 1123px at 96 DPI
+ */
+
+.a4-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  min-height: 100vh;
+  background-color: #e0e0e0;
+}
+
+.a4-page {
+  width: 794px;
+  min-height: 1123px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+  box-sizing: border-box;
+  
+  /* Margins matching specification */
+  /* Top: 25mm ≈ 94px, Bottom: 25mm ≈ 94px */
+  /* Left: 20mm ≈ 76px, Right: 20mm ≈ 76px */
+  padding: 94px 76px;
+}
+
+.a4-page-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Title Section */
+.title-section {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 20px;
+}
+
+.title-input {
+  width: 100%;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  padding: 8px;
+}
+
+.title-input::placeholder {
+  color: #aaa;
+  font-weight: normal;
+}
+
+.title-input:focus {
+  background-color: #f8f8f8;
+  border-radius: 4px;
+}
+
+/* Two-Column Layout */
+.columns-container {
+  display: flex;
+  flex: 1;
+  gap: 57px; /* Column gap: 15mm ≈ 57px */
+}
+
+/* Three-Column Layout - smaller gap */
+.columns-container.columns-3 {
+  gap: 30px;
+}
+
+/* RTL Support */
+.columns-container.rtl {
+  flex-direction: row-reverse;
+}
+
+.column {
+  flex: 1;
+  min-height: 400px;
+  position: relative;
+  padding-top: 35px; /* Space for chord mode toggle */
+}
+
+/* Column separator line */
+.columns-container.columns-2 .column:first-child::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -28px; /* Half of the gap */
+  width: 1px;
+  height: 100%;
+  background-color: #e8e8e8;
+}
+
+.columns-container.columns-3 .column:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -15px; /* Half of the 30px gap */
+  width: 1px;
+  height: 100%;
+  background-color: #e8e8e8;
+}
+
+.columns-container.rtl .column:first-child::after {
+  right: auto;
+  left: -28px;
+}
+
+.columns-container.rtl.columns-3 .column:not(:last-child)::after {
+  right: auto;
+  left: -15px;
+}
+
+/* Overflow indicator */
+.overflow-indicator {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  right: 0;
+  background-color: #fff3cd;
+  color: #856404;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ffc107;
+  text-align: center;
+  z-index: 20;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.column.overflow {
+  border: 2px solid #ffc107;
+  border-radius: 4px;
+  background-color: rgba(255, 243, 205, 0.1);
+}
+
+/* Active column indicator */
+.active-indicator {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  background-color: #e3f2fd;
+  color: #1565c0;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid #90caf9;
+  z-index: 15;
+}
+
+/* RTL mode - active indicator on right */
+.columns-container.rtl .active-indicator {
+  left: auto;
+  right: 0;
+}
+
+.column.active {
+  border: 2px solid #90caf9;
+  border-radius: 4px;
+}
+
+.column.active.overflow {
+  border-color: #ffc107;
+}
+
+/* New page indicator */
+.new-page-indicator {
+  margin-top: 20px;
+  padding: 12px 16px;
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border: 1px dashed #1565c0;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Lyrics Text Area */
+.lyrics-textarea {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+  line-height: 2.2;
+  color: #333;
+  background: transparent;
+  padding: 0;
+}
+
+.lyrics-textarea::placeholder {
+  color: #bbb;
+}
+
+.lyrics-textarea:focus {
+  background-color: #fafafa;
+  border-radius: 4px;
+  padding: 8px;
+  margin: -8px;
+  width: calc(100% + 16px);
+}
+
+/* RTL text direction */
+.lyrics-textarea.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.lyrics-textarea.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Print and PDF styles */
+@media print {
+  .a4-page-container {
+    padding: 0;
+    background-color: #ffffff;
+    min-height: auto;
+  }
+
+  .a4-page {
+    box-shadow: none;
+    margin: 0;
+    /* Use same pixel values as screen for consistency */
+    width: 794px;
+    min-height: auto;
+    padding: 94px 76px;
+    /* Let the browser handle the scaling to paper size */
+  }
+
+  .column {
+    /* Remove the padding for chord mode toggle in print */
+    padding-top: 0 !important;
+    min-height: auto !important;
+    border: none !important;
+    background-color: transparent !important;
+  }
+
+  /* Hide column separator in print */
+  .column::after {
+    display: none !important;
+  }
+
+  .lyrics-textarea:focus {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
+
+  /* Hide editing indicators when printing */
+  .active-indicator,
+  .overflow-indicator,
+  .new-page-indicator {
+    display: none !important;
+  }
+
+  .title-section {
+    border-bottom: 1px solid #ccc;
+  }
+
+  .title-input {
+    border: none !important;
+    background: transparent !important;
+  }
+}
