@@ -16,15 +16,35 @@
 .a4-page {
   width: 794px;
   min-height: 1123px;
+  height: 1193px; /* Increased to better match actual print area */
   background-color: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   position: relative;
   box-sizing: border-box;
+  overflow: visible; /* Allow content to overflow visually */
   
   /* Margins matching specification */
   /* Top: 25mm ≈ 94px, Bottom: 25mm ≈ 94px */
   /* Left: 20mm ≈ 76px, Right: 20mm ≈ 76px */
   padding: 94px 76px;
+}
+
+/* Page boundary indicator - red dashed line at the very edge of the page */
+.a4-page::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    #e74c3c 0px,
+    #e74c3c 10px,
+    transparent 10px,
+    transparent 20px
+  );
+  z-index: 1000;
 }
 
 .a4-page-content {
@@ -231,6 +251,11 @@
 
 /* Print and PDF styles */
 @media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   .a4-page-container {
     padding: 0;
     background-color: #ffffff;
@@ -240,11 +265,41 @@
   .a4-page {
     box-shadow: none;
     margin: 0;
-    /* Use same pixel values as screen for consistency */
-    width: 794px;
+    width: 100%;
+    height: auto;
     min-height: auto;
-    padding: 94px 76px;
-    /* Let the browser handle the scaling to paper size */
+    padding: 15mm 15mm;
+    overflow: visible;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Hide page boundary indicator in print */
+  .a4-page::before,
+  .a4-page::after {
+    display: none !important;
+  }
+
+  .a4-page-content {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .title-section {
+    border-bottom: 1px solid #ccc;
+    page-break-after: avoid;
+    break-after: avoid;
+    margin-bottom: 20px;
+  }
+
+  .title-input {
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .columns-container {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
   .column {
@@ -253,6 +308,8 @@
     min-height: auto !important;
     border: none !important;
     background-color: transparent !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
   /* Hide column separator in print */
@@ -274,12 +331,9 @@
     display: none !important;
   }
 
-  .title-section {
-    border-bottom: 1px solid #ccc;
-  }
-
-  .title-input {
-    border: none !important;
-    background: transparent !important;
+  /* Prevent lyrics lines from breaking across pages */
+  .lyrics-line {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }
