@@ -347,6 +347,14 @@
   background-color: #f5f5f5;
 }
 
+.context-menu-item.change {
+  color: #1565c0;
+}
+
+.context-menu-item.change:hover {
+  background-color: #e3f2fd;
+}
+
 .context-menu-item.delete {
   color: #d32f2f;
 }

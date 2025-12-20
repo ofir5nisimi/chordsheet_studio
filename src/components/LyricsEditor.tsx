@@ -50,6 +50,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const [contextMenuChordId, setContextMenuChordId] = useState<string | null>(null);
+  const [editingChordId, setEditingChordId] = useState<string | null>(null);
   
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRefs = useRef<Map<number, HTMLInputElement>>(new Map());
@@ -82,6 +83,15 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
       const newLines = [...lines];
       newLines.splice(lineIndex + 1, 0, '');
       onTextChange(newLines.join('\n'));
+      
+      // Shift all chords on lines after the inserted line down by 1
+      const updatedChords = chords.map(chord => 
+        chord.lineIndex > lineIndex
+          ? { ...chord, lineIndex: chord.lineIndex + 1 }
+          : chord
+      );
+      onChordsChange(updatedChords);
+      
       // Focus new line
       setTimeout(() => {
         setEditingLineIndex(lineIndex + 1);
@@ -92,6 +102,17 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
       // Delete empty line
       const newLines = lines.filter((_, i) => i !== lineIndex);
       onTextChange(newLines.join('\n'));
+      
+      // Remove chords on the deleted line and shift chords on lines after it up by 1
+      const updatedChords = chords
+        .filter(chord => chord.lineIndex !== lineIndex) // Remove chords on deleted line
+        .map(chord => 
+          chord.lineIndex > lineIndex
+            ? { ...chord, lineIndex: chord.lineIndex - 1 }
+            : chord
+        );
+      onChordsChange(updatedChords);
+      
       // Focus previous line
       setTimeout(() => {
         setEditingLineIndex(lineIndex - 1);
@@ -106,7 +127,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
       setEditingLineIndex(lineIndex + 1);
       inputRefs.current.get(lineIndex + 1)?.focus();
     }
-  }, [lines, onTextChange]);
+  }, [lines, chords, onTextChange, onChordsChange]);
 
   // Handle click on character to add chord
   const handleCharClick = useCallback((e: React.MouseEvent, lineIndex: number, charIndex: number) => {
@@ -144,7 +165,18 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
 
   // Handle chord selection from dropdown
   const handleSelectChord = useCallback((chord: ChordDefinition) => {
-    if (pendingChordPosition) {
+    if (editingChordId) {
+      // Changing an existing chord
+      onChordsChange(
+        chords.map(c =>
+          c.id === editingChordId
+            ? { ...c, chordSymbol: chord.symbol, chordName: chord.name }
+            : c
+        )
+      );
+      setEditingChordId(null);
+    } else if (pendingChordPosition) {
+      // Adding a new chord
       const newChord: PlacedChord = {
         id: generateChordId(),
         chordSymbol: chord.symbol,
@@ -157,12 +189,13 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
     }
     setDropdownPosition(null);
     setPendingChordPosition(null);
-  }, [pendingChordPosition, chords, onChordsChange, generateChordId]);
+  }, [pendingChordPosition, editingChordId, chords, onChordsChange, generateChordId]);
 
   // Close dropdown
   const handleCloseDropdown = useCallback(() => {
     setDropdownPosition(null);
     setPendingChordPosition(null);
+    setEditingChordId(null);
   }, []);
 
   // Handle chord click (select)
@@ -189,13 +222,14 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
       const deltaX = e.clientX - dragStartX;
       let newOffset = dragStartOffset + deltaX;
       
-      // Constrain to column boundaries
+      // Constrain to column boundaries with some padding for flexibility
       const chord = chords.find(c => c.id === draggingChordId);
       if (chord && editorRef.current) {
         const columnWidth = editorRef.current.offsetWidth;
         const charPosition = chord.charIndex * 8.4; // charWidth
-        const minOffset = -charPosition; // Don't go past left edge
-        const maxOffset = columnWidth - charPosition - 30; // Don't go past right edge (30px for chord width)
+        const padding = 5; // Extra space on both sides for positioning flexibility
+        const minOffset = -charPosition - padding; // Allow some space past the left edge
+        const maxOffset = columnWidth - charPosition + padding; // Allow some space past the right edge
         newOffset = Math.max(minOffset, Math.min(maxOffset, newOffset));
       }
       
@@ -259,6 +293,15 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
     }
     closeContextMenu();
   }, [contextMenuChordId, closeContextMenu]);
+
+  // Handle change chord click from context menu
+  const handleChangeChordClick = useCallback(() => {
+    if (contextMenuChordId && contextMenuPosition) {
+      setEditingChordId(contextMenuChordId);
+      setDropdownPosition({ x: contextMenuPosition.x, y: contextMenuPosition.y });
+    }
+    closeContextMenu();
+  }, [contextMenuChordId, contextMenuPosition, closeContextMenu]);
 
   // Confirm delete
   const confirmDelete = useCallback(() => {
@@ -554,6 +597,9 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
           style={{ left: contextMenuPosition.x, top: contextMenuPosition.y }}
           onClick={(e) => e.stopPropagation()}
         >
+          <button className="context-menu-item change" onClick={handleChangeChordClick}>
+            ✏️ Change Chord
+          </button>
           <button className="context-menu-item delete" onClick={handleDeleteClick}>
             🗑️ Delete Chord
           </button>
