@@ -51,6 +51,8 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const [contextMenuChordId, setContextMenuChordId] = useState<string | null>(null);
   const [editingChordId, setEditingChordId] = useState<string | null>(null);
+  const [copiedChords, setCopiedChords] = useState<PlacedChord[] | null>(null);
+  const [lineHoverIndex, setLineHoverIndex] = useState<number | null>(null);
   
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRefs = useRef<Map<number, HTMLInputElement>>(new Map());
@@ -400,15 +402,44 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
     );
   }, [showGrid]);
 
+  // Handle copying chords from a line
+  const handleCopyChords = useCallback((lineIndex: number) => {
+    const lineChords = getChordsForLine(lineIndex);
+    if (lineChords.length > 0) {
+      setCopiedChords(lineChords);
+      setContextMenuPosition(null);
+    }
+  }, [getChordsForLine]);
+
+  // Handle pasting chords to a line
+  const handlePasteChords = useCallback((targetLineIndex: number) => {
+    if (!copiedChords || copiedChords.length === 0) return;
+    
+    // Create new chords with updated line index and new IDs
+    const newChords = copiedChords.map(chord => ({
+      ...chord,
+      id: generateChordId(),
+      lineIndex: targetLineIndex,
+    }));
+    
+    // Remove existing chords on target line and add new ones
+    const filteredChords = chords.filter(c => c.lineIndex !== targetLineIndex);
+    onChordsChange([...filteredChords, ...newChords]);
+  }, [copiedChords, chords, onChordsChange, generateChordId]);
+
   // Render chords for a line
   const renderLineChords = useCallback((lineIndex: number, isChordOnlyLine: boolean = false) => {
     const lineChords = getChordsForLine(lineIndex);
     const isRtl = direction === 'rtl';
+    const hasChords = lineChords.length > 0;
+    const canPaste = copiedChords && copiedChords.length > 0;
     
     return (
       <div 
         className={`line-chords-row ${chordMode ? 'clickable' : ''} ${isChordOnlyLine ? 'chord-only' : ''}`}
         onClick={chordMode ? (e) => handleChordRowClick(e, lineIndex) : undefined}
+        onMouseEnter={() => setLineHoverIndex(lineIndex)}
+        onMouseLeave={() => setLineHoverIndex(null)}
         title={chordMode ? 'Click to add chord here' : undefined}
       >
         {lineChords.map((chord) => {
@@ -431,9 +462,31 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
         {chordMode && lineChords.length === 0 && (
           <span className="chord-placeholder">+ Click to add chord</span>
         )}
+        {!chordMode && lineHoverIndex === lineIndex && (
+          <div className="chord-line-actions">
+            {hasChords && (
+              <button 
+                className="copy-chords-btn"
+                onClick={(e) => { e.stopPropagation(); handleCopyChords(lineIndex); }}
+                title="Copy chords from this line (Ctrl+C)"
+              >
+                📋 Copy
+              </button>
+            )}
+            {canPaste && (
+              <button 
+                className="paste-chords-btn"
+                onClick={(e) => { e.stopPropagation(); handlePasteChords(lineIndex); }}
+                title="Paste chords to this line (Ctrl+V)"
+              >
+                📄 Paste
+              </button>
+            )}
+          </div>
+        )}
       </div>
     );
-  }, [getChordsForLine, getCharacterPosition, selectedChordId, draggingChordId, handleChordClick, handleChordDragStart, handleChordContextMenu, chordMode, handleChordRowClick, direction]);
+  }, [getChordsForLine, getCharacterPosition, selectedChordId, draggingChordId, handleChordClick, handleChordDragStart, handleChordContextMenu, chordMode, handleChordRowClick, direction, lineHoverIndex, copiedChords, handleCopyChords, handlePasteChords]);
 
   // Render a single line
   const renderLine = useCallback((line: string, lineIndex: number) => {
@@ -520,6 +573,22 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
     onTextChange(newText);
     // Note: The user can now click on this empty line's chord row to add chords
   }, [text, onTextChange]);
+
+  // Keyboard shortcuts for copy/paste
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c' && lineHoverIndex !== null && !editingLineIndex) {
+        e.preventDefault();
+        handleCopyChords(lineHoverIndex);
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'v' && lineHoverIndex !== null && copiedChords && !editingLineIndex) {
+        e.preventDefault();
+        handlePasteChords(lineHoverIndex);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [lineHoverIndex, copiedChords, editingLineIndex, handleCopyChords, handlePasteChords]);
 
   return (
     <div ref={editorRef} className="lyrics-editor">

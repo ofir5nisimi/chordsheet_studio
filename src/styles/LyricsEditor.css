@@ -116,6 +116,47 @@
   margin-bottom: 8px;
 }
 
+/* Copy/Paste chord actions */
+.chord-line-actions {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  display: flex;
+  gap: 4px;
+  z-index: 50;
+}
+
+.lyrics-lines-container.rtl .chord-line-actions {
+  right: auto;
+  left: 4px;
+}
+
+.copy-chords-btn,
+.paste-chords-btn {
+  padding: 2px 8px;
+  font-size: 10px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: #495057;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.copy-chords-btn:hover {
+  background-color: #e7f3ff;
+  border-color: #2196f3;
+  color: #1976d2;
+}
+
+.paste-chords-btn:hover {
+  background-color: #e8f5e9;
+  border-color: #4caf50;
+  color: #2e7d32;
+}
+
 .lyrics-line.chord-only-line .line-lyrics-row.chord-only {
   min-height: 8px;
   height: 8px;
@@ -434,7 +475,10 @@
   .delete-confirm-overlay,
   .grid-overlay,
   .add-line-area,
-  .chord-placeholder {
+  .chord-placeholder,
+  .chord-line-actions,
+  .copy-chords-btn,
+  .paste-chords-btn {
     display: none !important;
   }
 
