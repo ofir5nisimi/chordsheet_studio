@@ -19,6 +19,19 @@ import './App.css';
  * Main application component that manages the chord sheet state
  * and renders the A4 page editor.
  */
+// History state type for undo/redo
+interface HistoryState {
+  title: string;
+  leftColumnText: string;
+  middleColumnText: string;
+  rightColumnText: string;
+  leftColumnChords: PlacedChord[];
+  middleColumnChords: PlacedChord[];
+  rightColumnChords: PlacedChord[];
+}
+
+const MAX_HISTORY_SIZE = 50;
+
 function App() {
   // Document state
   const [title, setTitle] = useState('');
@@ -31,6 +44,12 @@ function App() {
   const [direction, setDirection] = useState<TextDirection>('ltr');
   const [showGrid, setShowGrid] = useState(false);
   const [columnCount, setColumnCount] = useState<2 | 3>(2);
+
+  // Undo/Redo history
+  const [history, setHistory] = useState<HistoryState[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const isUndoRedoRef = useRef(false);
+  const historyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // File management state
   const [currentDocId, setCurrentDocId] = useState<string | null>(null);
@@ -89,6 +108,97 @@ function App() {
     setStatusMessage(message);
     setTimeout(() => setStatusMessage(null), 2000);
   }, []);
+
+  // Track changes for undo/redo history (debounced)
+  useEffect(() => {
+    // Skip if this change is from undo/redo
+    if (isUndoRedoRef.current) {
+      isUndoRedoRef.current = false;
+      return;
+    }
+
+    // Debounce history updates to avoid too many entries
+    if (historyTimeoutRef.current) {
+      clearTimeout(historyTimeoutRef.current);
+    }
+
+    historyTimeoutRef.current = setTimeout(() => {
+      const currentState: HistoryState = {
+        title,
+        leftColumnText,
+        middleColumnText,
+        rightColumnText,
+        leftColumnChords,
+        middleColumnChords,
+        rightColumnChords,
+      };
+
+      setHistory(prev => {
+        // If we're not at the end, truncate future states
+        const newHistory = prev.slice(0, historyIndex + 1);
+        
+        // Don't add if identical to last state
+        const lastState = newHistory[newHistory.length - 1];
+        if (lastState && 
+            lastState.title === currentState.title &&
+            lastState.leftColumnText === currentState.leftColumnText &&
+            lastState.middleColumnText === currentState.middleColumnText &&
+            lastState.rightColumnText === currentState.rightColumnText &&
+            JSON.stringify(lastState.leftColumnChords) === JSON.stringify(currentState.leftColumnChords) &&
+            JSON.stringify(lastState.middleColumnChords) === JSON.stringify(currentState.middleColumnChords) &&
+            JSON.stringify(lastState.rightColumnChords) === JSON.stringify(currentState.rightColumnChords)) {
+          return prev;
+        }
+
+        // Add new state and limit history size
+        const updatedHistory = [...newHistory, currentState].slice(-MAX_HISTORY_SIZE);
+        setHistoryIndex(updatedHistory.length - 1);
+        return updatedHistory;
+      });
+    }, 300); // 300ms debounce
+
+    return () => {
+      if (historyTimeoutRef.current) {
+        clearTimeout(historyTimeoutRef.current);
+      }
+    };
+  }, [title, leftColumnText, middleColumnText, rightColumnText, leftColumnChords, middleColumnChords, rightColumnChords, historyIndex]);
+
+  // Undo function
+  const handleUndo = useCallback(() => {
+    if (historyIndex > 0) {
+      isUndoRedoRef.current = true;
+      const prevState = history[historyIndex - 1];
+      setTitle(prevState.title);
+      setLeftColumnText(prevState.leftColumnText);
+      setMiddleColumnText(prevState.middleColumnText);
+      setRightColumnText(prevState.rightColumnText);
+      setLeftColumnChords(prevState.leftColumnChords);
+      setMiddleColumnChords(prevState.middleColumnChords);
+      setRightColumnChords(prevState.rightColumnChords);
+      setHistoryIndex(historyIndex - 1);
+    }
+  }, [history, historyIndex]);
+
+  // Redo function
+  const handleRedo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      isUndoRedoRef.current = true;
+      const nextState = history[historyIndex + 1];
+      setTitle(nextState.title);
+      setLeftColumnText(nextState.leftColumnText);
+      setMiddleColumnText(nextState.middleColumnText);
+      setRightColumnText(nextState.rightColumnText);
+      setLeftColumnChords(nextState.leftColumnChords);
+      setMiddleColumnChords(nextState.middleColumnChords);
+      setRightColumnChords(nextState.rightColumnChords);
+      setHistoryIndex(historyIndex + 1);
+    }
+  }, [history, historyIndex]);
+
+  // Check if undo/redo are available
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
 
   // Toggle text direction
   const toggleDirection = useCallback(() => {
@@ -407,13 +517,27 @@ function App() {
             e.preventDefault();
             toggleGrid();
             break;
+          case 'z':
+            // Ctrl+Z: Undo, Ctrl+Shift+Z: Redo
+            e.preventDefault();
+            if (e.shiftKey) {
+              handleRedo();
+            } else {
+              handleUndo();
+            }
+            break;
+          case 'y':
+            // Ctrl+Y: Redo
+            e.preventDefault();
+            handleRedo();
+            break;
         }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [toggleDirection, toggleGrid, handleSave, handleSaveAs, handleNew, handlePrint]);
+  }, [toggleDirection, toggleGrid, handleSave, handleSaveAs, handleNew, handlePrint, handleUndo, handleRedo]);
 
   return (
     <div className={`app ${direction}`} dir={direction}>
@@ -450,6 +574,23 @@ function App() {
             title="Print / Export PDF (Ctrl+P)"
           >
             🖨️ Print
+          </button>
+          <span className="toolbar-divider">|</span>
+          <button
+            className={`toolbar-button ${!canUndo ? 'disabled' : ''}`}
+            onClick={handleUndo}
+            disabled={!canUndo}
+            title="Undo (Ctrl+Z)"
+          >
+            ↩️ Undo
+          </button>
+          <button
+            className={`toolbar-button ${!canRedo ? 'disabled' : ''}`}
+            onClick={handleRedo}
+            disabled={!canRedo}
+            title="Redo (Ctrl+Y / Ctrl+Shift+Z)"
+          >
+            ↪️ Redo
           </button>
           <span className="toolbar-divider">|</span>
           <button

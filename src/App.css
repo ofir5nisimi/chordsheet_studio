@@ -118,6 +118,19 @@
   background-color: #229954;
 }
 
+.toolbar-button.disabled,
+.toolbar-button:disabled {
+  background-color: #7f8c8d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.toolbar-button.disabled:hover,
+.toolbar-button:disabled:hover {
+  background-color: #7f8c8d;
+  transform: none;
+}
+
 .direction-toggle {
   min-width: 120px;
   text-align: center;
