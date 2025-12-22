@@ -220,7 +220,9 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - dragStartX;
-      let newOffset = dragStartOffset + deltaX;
+      // For RTL, invert the drag direction since we use 'right' positioning
+      const adjustedDelta = direction === 'rtl' ? -deltaX : deltaX;
+      let newOffset = dragStartOffset + adjustedDelta;
       
       // Constrain to column boundaries with some padding for flexibility
       const chord = chords.find(c => c.id === draggingChordId);
@@ -401,6 +403,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   // Render chords for a line
   const renderLineChords = useCallback((lineIndex: number, isChordOnlyLine: boolean = false) => {
     const lineChords = getChordsForLine(lineIndex);
+    const isRtl = direction === 'rtl';
     
     return (
       <div 
@@ -410,11 +413,13 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
       >
         {lineChords.map((chord) => {
           const position = getCharacterPosition(chord.charIndex) + chord.offsetX;
+          // For RTL, position from right; for LTR, position from left
+          const positionStyle = isRtl ? { right: position } : { left: position };
           return (
             <div
               key={chord.id}
               className={`chord-display ${selectedChordId === chord.id ? 'selected' : ''} ${draggingChordId === chord.id ? 'dragging' : ''}`}
-              style={{ left: position }}
+              style={positionStyle}
               onClick={(e) => handleChordClick(e, chord.id)}
               onMouseDown={(e) => handleChordDragStart(e, chord)}
               onContextMenu={(e) => handleChordContextMenu(e, chord.id)}
@@ -428,7 +433,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
         )}
       </div>
     );
-  }, [getChordsForLine, getCharacterPosition, selectedChordId, draggingChordId, handleChordClick, handleChordDragStart, handleChordContextMenu, chordMode, handleChordRowClick]);
+  }, [getChordsForLine, getCharacterPosition, selectedChordId, draggingChordId, handleChordClick, handleChordDragStart, handleChordContextMenu, chordMode, handleChordRowClick, direction]);
 
   // Render a single line
   const renderLine = useCallback((line: string, lineIndex: number) => {
