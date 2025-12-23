@@ -9,8 +9,6 @@ import {
   generateDocumentId,
   exportAsJson,
   importFromJson,
-  transposeChord,
-  shouldPreferFlats,
   type ChordSheetDocument,
 } from './utils';
 import './App.css';
