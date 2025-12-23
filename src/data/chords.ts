@@ -74,6 +74,7 @@ function generateChordsForRoot(root: string): ChordDefinition[] {
   // Diminished and Augmented
   chords.push({ symbol: `${root}dim`, name: `${root} Diminished`, root, category: 'diminished' });
   chords.push({ symbol: `${root}dim7`, name: `${root} Diminished 7th`, root, category: 'diminished' });
+  chords.push({ symbol: `${root}m7b5`, name: `${root} Half-Diminished (m7♭5)`, root, category: 'diminished' });
   chords.push({ symbol: `${root}aug`, name: `${root} Augmented`, root, category: 'augmented' });
   chords.push({ symbol: `${root}aug7`, name: `${root} Augmented 7th`, root, category: 'augmented' });
   
