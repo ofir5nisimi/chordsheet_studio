@@ -81,21 +81,6 @@ const A4Page: React.FC<A4PageProps> = ({
   const middleOverflow = middleLineCount > MAX_LINES_PER_COLUMN;
   const rightOverflow = rightLineCount > MAX_LINES_PER_COLUMN;
 
-  // Determine which column should be active (next to write in)
-  const activeColumn = useMemo(() => {
-    if (direction === 'ltr') {
-      // LTR: left -> middle (if 3 cols) -> right
-      if (leftLineCount <= MAX_LINES_PER_COLUMN || leftColumnText.trim() === '') return 'left';
-      if (columnCount === 3 && (middleLineCount <= MAX_LINES_PER_COLUMN || middleColumnText.trim() === '')) return 'middle';
-      return 'right';
-    } else {
-      // RTL: right -> middle (if 3 cols) -> left
-      if (rightLineCount <= MAX_LINES_PER_COLUMN || rightColumnText.trim() === '') return 'right';
-      if (columnCount === 3 && (middleLineCount <= MAX_LINES_PER_COLUMN || middleColumnText.trim() === '')) return 'middle';
-      return 'left';
-    }
-  }, [direction, columnCount, leftLineCount, middleLineCount, rightLineCount, leftColumnText, middleColumnText, rightColumnText]);
-
   // Check if all columns are full (need new page)
   const allColumnsFull = useMemo(() => {
     if (columnCount === 2) {
@@ -154,10 +139,7 @@ const A4Page: React.FC<A4PageProps> = ({
           {/* Columns Layout */}
           <div className={`columns-container columns-${columnCount} ${direction}`}>
             {/* Left Column */}
-            <div className={`column ${leftOverflow ? 'overflow' : ''} ${activeColumn === 'left' ? 'active' : ''}`} ref={leftEditorRef}>
-              {activeColumn === 'left' && !leftOverflow && (
-                <div className="active-indicator">▶ Active</div>
-              )}
+            <div className={`column ${leftOverflow ? 'overflow' : ''}`} ref={leftEditorRef}>
               {leftOverflow && (
                 <div className="overflow-indicator" title="Content exceeds page - move to next column">
                   ⚠️ Overflow - Move to next column
@@ -179,10 +161,7 @@ const A4Page: React.FC<A4PageProps> = ({
 
             {/* Middle Column (only shown when columnCount is 3) */}
             {columnCount === 3 && (
-              <div className={`column ${middleOverflow ? 'overflow' : ''} ${activeColumn === 'middle' ? 'active' : ''}`} ref={middleEditorRef}>
-                {activeColumn === 'middle' && !middleOverflow && (
-                  <div className="active-indicator">▶ Active</div>
-                )}
+              <div className={`column ${middleOverflow ? 'overflow' : ''}`} ref={middleEditorRef}>
                 {middleOverflow && (
                   <div className="overflow-indicator" title="Content exceeds page - move to next column">
                     ⚠️ Overflow - Move to next column
@@ -204,10 +183,7 @@ const A4Page: React.FC<A4PageProps> = ({
             )}
 
             {/* Right Column */}
-            <div className={`column ${rightOverflow ? 'overflow' : ''} ${activeColumn === 'right' ? 'active' : ''}`} ref={rightEditorRef}>
-              {activeColumn === 'right' && !rightOverflow && (
-                <div className="active-indicator">▶ Active</div>
-              )}
+            <div className={`column ${rightOverflow ? 'overflow' : ''}`} ref={rightEditorRef}>
               {rightOverflow && (
                 <div className="overflow-indicator" title="Content exceeds page - move to next column">
                   ⚠️ Overflow - Move to next column

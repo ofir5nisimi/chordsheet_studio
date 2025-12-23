@@ -644,20 +644,12 @@ function App() {
           {/* View Actions */}
           <div className="toolbar-section view-actions">
           <button
-            className={`toolbar-button ${showGrid ? 'active' : ''}`}
-            onClick={toggleGrid}
-            aria-label={`${showGrid ? 'Hide' : 'Show'} alignment grid`}
-            title="Toggle Grid (Ctrl+G)"
-          >
-            ⊞ Grid
-          </button>
-          <button
             className={`toolbar-button ${columnCount === 3 ? 'active' : ''}`}
             onClick={toggleColumnCount}
             aria-label={`Switch to ${columnCount === 2 ? '3' : '2'} columns`}
             title="Toggle 3rd Column"
           >
-            {columnCount === 2 ? '⊞ 3 Columns' : '⊟ 2 Columns'}
+            {columnCount === 2 ? '⊞ Columns 2' : '⊟ Columns 3'}
           </button>
           <button
             className={`toolbar-button direction-toggle ${direction === 'rtl' ? 'active' : ''}`}
@@ -667,9 +659,6 @@ function App() {
           >
             {direction === 'ltr' ? '🔤 LTR → RTL' : '🔠 RTL → LTR'}
           </button>
-          {direction === 'rtl' && (
-            <span className="rtl-indicator" title="Right-to-Left mode active">עב</span>
-          )}
         </div>
 
         {/* Transpose Controls - force LTR to prevent RTL reversal */}
