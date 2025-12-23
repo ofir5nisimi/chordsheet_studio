@@ -43,6 +43,9 @@ function App() {
   const [rightColumnChords, setRightColumnChords] = useState<PlacedChord[]>([]);
   const [direction, setDirection] = useState<TextDirection>('ltr');
   const [showGrid, setShowGrid] = useState(false);
+  const [leftColumnIndicators, setLeftColumnIndicators] = useState<Set<number>>(new Set());
+  const [middleColumnIndicators, setMiddleColumnIndicators] = useState<Set<number>>(new Set());
+  const [rightColumnIndicators, setRightColumnIndicators] = useState<Set<number>>(new Set());
   const [columnCount, setColumnCount] = useState<2 | 3>(2);
 
   // Undo/Redo history
@@ -678,6 +681,12 @@ function App() {
           onMiddleColumnChordsChange={setMiddleColumnChords}
           rightColumnChords={rightColumnChords}
           onRightColumnChordsChange={setRightColumnChords}
+          leftColumnIndicators={leftColumnIndicators}
+          onLeftColumnIndicatorsChange={setLeftColumnIndicators}
+          middleColumnIndicators={middleColumnIndicators}
+          onMiddleColumnIndicatorsChange={setMiddleColumnIndicators}
+          rightColumnIndicators={rightColumnIndicators}
+          onRightColumnIndicatorsChange={setRightColumnIndicators}
           direction={direction}
           showGrid={showGrid}
           columnCount={columnCount}

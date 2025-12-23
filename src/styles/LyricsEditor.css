@@ -119,20 +119,25 @@
 /* Copy/Paste chord actions */
 .chord-line-actions {
   position: absolute;
-  top: 2px;
-  right: 4px;
+  top: -18px;
+  right: 0;
   display: flex;
   gap: 4px;
-  z-index: 50;
+  z-index: 150;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 2px 4px;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .lyrics-lines-container.rtl .chord-line-actions {
   right: auto;
-  left: 4px;
+  left: 0;
 }
 
 .copy-chords-btn,
-.paste-chords-btn {
+.paste-chords-btn,
+.indicator-toggle-btn {
   padding: 2px 8px;
   font-size: 10px;
   background-color: #f8f9fa;
@@ -155,6 +160,18 @@
   background-color: #e8f5e9;
   border-color: #4caf50;
   color: #2e7d32;
+}
+
+.indicator-toggle-btn:hover {
+  background-color: #fff3e0;
+  border-color: #ff9800;
+  color: #e65100;
+}
+
+.indicator-toggle-btn.active {
+  background-color: #fff3e0;
+  border-color: #ff9800;
+  color: #e65100;
 }
 
 .lyrics-line.chord-only-line .line-lyrics-row.chord-only {
@@ -200,6 +217,13 @@
   /* Always display chords LTR regardless of document direction */
   direction: ltr;
   unicode-bidi: isolate;
+  /* Transform to center the chord on its position point */
+  transform: translateX(-50%);
+}
+
+/* For RTL, mirror the transform */
+.lyrics-lines-container.rtl .chord-display {
+  transform: translateX(50%);
 }
 
 .chord-display:hover {
@@ -218,8 +242,17 @@
 .chord-display.dragging {
   cursor: grabbing;
   opacity: 0.8;
-  transform: scale(1.05);
   z-index: 100;
+}
+
+/* Preserve centering transform while dragging - LTR */
+.lyrics-lines-container.ltr .chord-display.dragging {
+  transform: translateX(-50%) scale(1.05);
+}
+
+/* Preserve centering transform while dragging - RTL */
+.lyrics-lines-container.rtl .chord-display.dragging {
+  transform: translateX(50%) scale(1.05);
 }
 
 /* Chord symbols styling */
@@ -229,6 +262,24 @@
 
 .chord-display .flat {
   color: #1565c0;
+}
+
+/* Chord position indicator (vertical line under chord) */
+.chord-display.with-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chord-indicator {
+  display: block;
+  font-size: 10px;
+  line-height: 1;
+  color: #1565c0;
+  margin-top: -2px;
+  font-weight: 400;
+  opacity: 0.8;
+  text-align: center;
 }
 
 /* Grid Overlay */
@@ -495,6 +546,15 @@
     /* Ensure consistent print styling */
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+
+  /* Maintain centering transform in print */
+  .lyrics-lines-container.ltr .chord-display {
+    transform: translateX(-50%) !important;
+  }
+
+  .lyrics-lines-container.rtl .chord-display {
+    transform: translateX(50%) !important;
   }
 
   .chord-display.selected {

@@ -21,6 +21,8 @@ interface LyricsEditorProps {
   onChordsChange: (chords: PlacedChord[]) => void;
   direction?: TextDirection;
   showGrid?: boolean;
+  lineIndicators?: Set<number>;
+  onLineIndicatorsChange?: (indicators: Set<number>) => void;
   placeholder?: string;
 }
 
@@ -37,6 +39,8 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   onChordsChange,
   direction = 'ltr',
   showGrid = false,
+  lineIndicators = new Set(),
+  onLineIndicatorsChange,
   placeholder = 'Type your lyrics here...',
 }) => {
   const [dropdownPosition, setDropdownPosition] = useState<{ x: number; y: number } | null>(null);
@@ -427,12 +431,25 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
     onChordsChange([...filteredChords, ...newChords]);
   }, [copiedChords, chords, onChordsChange, generateChordId]);
 
+  // Toggle indicator for a specific line
+  const handleToggleLineIndicator = useCallback((lineIndex: number) => {
+    if (!onLineIndicatorsChange) return;
+    const newIndicators = new Set(lineIndicators);
+    if (newIndicators.has(lineIndex)) {
+      newIndicators.delete(lineIndex);
+    } else {
+      newIndicators.add(lineIndex);
+    }
+    onLineIndicatorsChange(newIndicators);
+  }, [lineIndicators, onLineIndicatorsChange]);
+
   // Render chords for a line
   const renderLineChords = useCallback((lineIndex: number, isChordOnlyLine: boolean = false) => {
     const lineChords = getChordsForLine(lineIndex);
     const isRtl = direction === 'rtl';
     const hasChords = lineChords.length > 0;
     const canPaste = copiedChords && copiedChords.length > 0;
+    const showIndicatorForLine = lineIndicators.has(lineIndex);
     
     return (
       <div 
@@ -449,14 +466,16 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
           return (
             <div
               key={chord.id}
-              className={`chord-display ${selectedChordId === chord.id ? 'selected' : ''} ${draggingChordId === chord.id ? 'dragging' : ''}`}
+              className={`chord-display ${selectedChordId === chord.id ? 'selected' : ''} ${draggingChordId === chord.id ? 'dragging' : ''} ${showIndicatorForLine ? 'with-indicator' : ''}`}
               style={positionStyle}
               onClick={(e) => handleChordClick(e, chord.id)}
               onMouseDown={(e) => handleChordDragStart(e, chord)}
               onContextMenu={(e) => handleChordContextMenu(e, chord.id)}
               title={`${chord.chordName} - Drag to move, Right-click to delete`}
-              dangerouslySetInnerHTML={{ __html: renderChordSymbol(chord.chordSymbol) }}
-            />
+            >
+              <span dangerouslySetInnerHTML={{ __html: renderChordSymbol(chord.chordSymbol) }} />
+              {showIndicatorForLine && <span className="chord-indicator">|</span>}
+            </div>
           );
         })}
         {chordMode && lineChords.length === 0 && (
@@ -465,13 +484,22 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
         {!chordMode && lineHoverIndex === lineIndex && (
           <div className="chord-line-actions">
             {hasChords && (
-              <button 
-                className="copy-chords-btn"
-                onClick={(e) => { e.stopPropagation(); handleCopyChords(lineIndex); }}
-                title="Copy chords from this line (Ctrl+C)"
-              >
-                📋 Copy
-              </button>
+              <>
+                <button 
+                  className={`indicator-toggle-btn ${showIndicatorForLine ? 'active' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); handleToggleLineIndicator(lineIndex); }}
+                  title={showIndicatorForLine ? 'Hide position indicators' : 'Show position indicators'}
+                >
+                  {showIndicatorForLine ? '↓ Hide' : '↓ Show'}
+                </button>
+                <button 
+                  className="copy-chords-btn"
+                  onClick={(e) => { e.stopPropagation(); handleCopyChords(lineIndex); }}
+                  title="Copy chords from this line (Ctrl+C)"
+                >
+                  📋 Copy
+                </button>
+              </>
             )}
             {canPaste && (
               <button 
@@ -486,7 +514,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
         )}
       </div>
     );
-  }, [getChordsForLine, getCharacterPosition, selectedChordId, draggingChordId, handleChordClick, handleChordDragStart, handleChordContextMenu, chordMode, handleChordRowClick, direction, lineHoverIndex, copiedChords, handleCopyChords, handlePasteChords]);
+  }, [getChordsForLine, getCharacterPosition, selectedChordId, draggingChordId, handleChordClick, handleChordDragStart, handleChordContextMenu, chordMode, handleChordRowClick, direction, lineHoverIndex, copiedChords, handleCopyChords, handlePasteChords, lineIndicators, handleToggleLineIndicator]);
 
   // Render a single line
   const renderLine = useCallback((line: string, lineIndex: number) => {

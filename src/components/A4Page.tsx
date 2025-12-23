@@ -21,6 +21,12 @@ interface A4PageProps {
   onMiddleColumnChordsChange: (chords: PlacedChord[]) => void;
   rightColumnChords: PlacedChord[];
   onRightColumnChordsChange: (chords: PlacedChord[]) => void;
+  leftColumnIndicators?: Set<number>;
+  onLeftColumnIndicatorsChange?: (indicators: Set<number>) => void;
+  middleColumnIndicators?: Set<number>;
+  onMiddleColumnIndicatorsChange?: (indicators: Set<number>) => void;
+  rightColumnIndicators?: Set<number>;
+  onRightColumnIndicatorsChange?: (indicators: Set<number>) => void;
   direction?: TextDirection;
   showGrid?: boolean;
   columnCount?: 2 | 3;
@@ -50,6 +56,12 @@ const A4Page: React.FC<A4PageProps> = ({
   onMiddleColumnChordsChange,
   rightColumnChords,
   onRightColumnChordsChange,
+  leftColumnIndicators = new Set(),
+  onLeftColumnIndicatorsChange,
+  middleColumnIndicators = new Set(),
+  onMiddleColumnIndicatorsChange,
+  rightColumnIndicators = new Set(),
+  onRightColumnIndicatorsChange,
   direction = 'ltr',
   showGrid = false,
   columnCount = 2,
@@ -156,6 +168,8 @@ const A4Page: React.FC<A4PageProps> = ({
                 onChordsChange={onLeftColumnChordsChange}
                 direction={direction}
                 showGrid={showGrid}
+                lineIndicators={leftColumnIndicators}
+                onLineIndicatorsChange={onLeftColumnIndicatorsChange}
                 placeholder={`Click to add lyrics in ${getColumnLabel('left')} column...`}
               />
             </div>
@@ -178,6 +192,8 @@ const A4Page: React.FC<A4PageProps> = ({
                   onChordsChange={onMiddleColumnChordsChange}
                   direction={direction}
                   showGrid={showGrid}
+                  lineIndicators={middleColumnIndicators}
+                  onLineIndicatorsChange={onMiddleColumnIndicatorsChange}
                   placeholder={`Click to add lyrics in ${getColumnLabel('middle')} column...`}
                 />
               </div>
@@ -200,6 +216,8 @@ const A4Page: React.FC<A4PageProps> = ({
                 onChordsChange={onRightColumnChordsChange}
                 direction={direction}
                 showGrid={showGrid}
+                lineIndicators={rightColumnIndicators}
+                onLineIndicatorsChange={onRightColumnIndicatorsChange}
                 placeholder={`Click to add lyrics in ${getColumnLabel('right')} column...`}
               />
             </div>
