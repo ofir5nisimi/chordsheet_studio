@@ -547,10 +547,15 @@ function App() {
     <div className={`app ${direction}`} dir={direction}>
       {/* Toolbar */}
       <header className="toolbar">
-        <h1 className="app-title">Guitar Chords Sheet</h1>
+        {/* Top Row */}
+        <div className="toolbar-row toolbar-row-main">
+          <div className="app-branding">
+            <h1 className="app-title">Guitar Chords Sheet</h1>
+            <span className="app-author">By Ofir Nisimi</span>
+          </div>
         
-        {/* File Actions */}
-        <div className="toolbar-section file-actions">
+          {/* File Actions */}
+          <div className="toolbar-section file-actions">
           <button
             className="toolbar-button"
             onClick={handleNew}
@@ -620,8 +625,24 @@ function App() {
           />
         </div>
 
-        {/* View Actions */}
-        <div className="toolbar-section view-actions">
+          {/* Status */}
+          <div className="toolbar-section status-section">
+            {currentFileName && (
+              <span className="current-file" title={currentFileName}>
+                {currentFileName}
+              </span>
+            )}
+            {saveStatus === 'saved' && <span className="save-status saved">✓ Saved</span>}
+            {saveStatus === 'unsaved' && <span className="save-status unsaved">● Unsaved</span>}
+            {saveStatus === 'saving' && <span className="save-status saving">⏳ Saving...</span>}
+            {statusMessage && <span className="status-message">{statusMessage}</span>}
+          </div>
+        </div>
+
+        {/* Bottom Row */}
+        <div className="toolbar-row toolbar-row-secondary">
+          {/* View Actions */}
+          <div className="toolbar-section view-actions">
           <button
             className={`toolbar-button ${showGrid ? 'active' : ''}`}
             onClick={toggleGrid}
@@ -651,8 +672,8 @@ function App() {
           )}
         </div>
 
-        {/* Transpose Controls */}
-        <div className="toolbar-section transpose-section">
+        {/* Transpose Controls - force LTR to prevent RTL reversal */}
+        <div className="toolbar-section transpose-section" dir="ltr">
           <span className="transpose-label">Transpose:</span>
           <button
             className="toolbar-button transpose-btn"
@@ -683,18 +704,6 @@ function App() {
             </button>
           )}
         </div>
-
-        {/* Status */}
-        <div className="toolbar-section status-section">
-          {currentFileName && (
-            <span className="current-file" title={currentFileName}>
-              {currentFileName}
-            </span>
-          )}
-          {saveStatus === 'saved' && <span className="save-status saved">✓ Saved</span>}
-          {saveStatus === 'unsaved' && <span className="save-status unsaved">● Unsaved</span>}
-          {saveStatus === 'saving' && <span className="save-status saving">⏳ Saving...</span>}
-          {statusMessage && <span className="status-message">{statusMessage}</span>}
         </div>
       </header>
 
