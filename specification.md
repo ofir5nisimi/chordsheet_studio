@@ -1,10 +1,12 @@
 ```markdown
 # Guitar Chords Sheet Web Application - Software Specification
 
-**Version:** 1.0  
-**Date:** December 18, 2025  
+**Version:** 1.1  
+**Date:** December 23, 2025  
 **Project Type:** Web Application  
-**Technology Stack:** TypeScript, Vite, React
+**Technology Stack:** TypeScript, Vite, React  
+**Author:** Ofir Nisimi  
+**Live Demo:** https://ofir5nisimi.github.io/chordsheet_studio/
 
 ---
 
@@ -22,14 +24,17 @@ The primary users of this application are musicians, songwriters, and music educ
 
 The application provides the following core capabilities:
 
-- A4 format document editing with two-column layout
+- A4 format document editing with two or three-column layout (toggleable)
 - Precise chord positioning above lyrics text
 - Comprehensive guitar chord database with search functionality
+- **Chord transposition** - transpose all chords up or down by -12 to +12 semitones
 - Right-to-left language support (particularly Hebrew)
 - Horizontal chord dragging for fine-tuning position
 - Automatic page and column flow management
 - Local file save and load functionality
-- PDF export matching on-screen appearance
+- Export/Import functionality (JSON format)
+- Print support with A4 formatting
+- Undo/Redo support with full history
 
 ---
 
@@ -74,9 +79,15 @@ The application provides the following core capabilities:
 
 The application simulates an A4 paper format within the web interface, providing users with a familiar document-like editing experience. The page dimensions will be calculated to maintain A4 proportions (210mm x 297mm, aspect ratio 1:1.414) while adapting to different screen sizes. The page will be displayed with a white background, subtle shadow effect, and centered positioning on the screen to create a professional document appearance.
 
-**Two-Column Layout:**
+**Two/Three-Column Layout:**
 
-Each A4 page is divided into two equal vertical columns with appropriate spacing and margins. The columns serve as independent content areas for lyrics and chords, maximizing the use of page space while maintaining readability. A subtle visual separator between columns helps users distinguish between the two editing areas.
+Each A4 page can be configured with either two or three equal vertical columns with appropriate spacing and margins. Users can toggle between layouts using the toolbar button. The columns serve as independent content areas for lyrics and chords, maximizing the use of page space while maintaining readability. A subtle visual separator between columns helps users distinguish between the editing areas.
+
+**Column Layout Toggle:**
+- Two-column layout: Default, wider columns for longer lines
+- Three-column layout: More compact, fits more content per page
+- Toggle button in toolbar shows current state ("2 Columns" / "3 Columns")
+- Layout preference persists with saved documents
 
 **Margins and Spacing:**
 
@@ -267,6 +278,36 @@ Users can remove chords that are no longer needed.
 - Right-click chord and select "Delete" from context menu
 - Confirmation dialog prevents accidental deletion
 - Undo functionality available for deleted chords
+
+### **4.7 Chord Transposition**
+
+**Transposition Feature:**
+
+The application provides a built-in transposition system to shift all chords up or down by semitones.
+
+**Transposition Capabilities:**
+- Range: -12 to +12 semitones (full octave up or down)
+- All chords in the document are transposed simultaneously
+- Smart accidental handling based on musical context
+- Preserves chord qualities (major, minor, 7th, etc.)
+
+**Smart Accidental Logic:**
+- Uses sharps when transposing up
+- Uses flats when transposing down
+- Respects the original chord's accidental preference
+- Keys like F, Bb, Eb, Ab prefer flats
+- Keys like G, D, A, E, B prefer sharps
+
+**Slash Chord Handling:**
+- Both root note and bass note are transposed correctly
+- Example: Am/G transposed +2 = Bm/A
+- Maintains slash chord notation throughout
+
+**User Interface:**
+- Transpose controls in the toolbar with +/- buttons
+- Current transposition value displayed between buttons
+- Real-time preview of transposed chords
+- Transposition resets to 0 when loading new document
 
 ---
 
@@ -846,7 +887,7 @@ While not part of the initial specification, the following features could be con
 - Real-time collaborative editing
 
 **Advanced Editing:**
-- Chord transposition
+- ~~Chord transposition~~ ✅ **Implemented in v1.1**
 - Key signature detection and display
 - Tempo and time signature notation
 - Section markers (Verse, Chorus, Bridge)
@@ -920,4 +961,12 @@ The phased implementation approach outlined in the accompanying TODO list ensure
 
 **Document Version History:**
 - Version 1.0 (December 18, 2025): Initial specification document
+- Version 1.1 (December 23, 2025): Added implemented features:
+  - Chord transposition system (-12 to +12 semitones)
+  - Two/Three column layout toggle
+  - Toolbar UI improvements with centered layout
+  - Author branding ("By Ofir Nisimi")
+  - Fixed RTL button text stability
+  - Export/Import JSON functionality
+  - Responsive toolbar design for smaller screens
 ```

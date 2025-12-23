@@ -1,73 +1,111 @@
-# React + TypeScript + Vite
+# Guitar Chords Sheet (Chordsheet Studio)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A professional web application for creating guitar chord sheets with lyrics. Built with React, TypeScript, and Vite.
 
-Currently, two official plugins are available:
+**Live Demo:** [https://ofir5nisimi.github.io/chordsheet_studio/](https://ofir5nisimi.github.io/chordsheet_studio/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+### Core Functionality
+- **A4 Format Document Editing** - Professional page layout with accurate print dimensions
+- **Two/Three Column Layout** - Toggle between 2 and 3 column layouts for optimal space usage
+- **Precise Chord Positioning** - Click anywhere on lyrics to add chords with exact positioning
+- **Horizontal Chord Dragging** - Fine-tune chord positions by dragging left/right
+- **Comprehensive Chord Database** - All major, minor, 7th, and extended chords with search functionality
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Transposition
+- **Chord Transposition** - Transpose all chords up or down by -12 to +12 semitones
+- **Smart Accidental Handling** - Automatically uses sharps or flats based on musical context
+- **Slash Chord Support** - Correctly transposes slash chords (e.g., Am/G → Bm/A)
 
-## Expanding the ESLint configuration
+### Language Support
+- **RTL/LTR Toggle** - Full support for right-to-left languages (Hebrew, Arabic)
+- **Bidirectional Text** - Proper handling of mixed direction content
+- **Interface Mirroring** - UI adapts to selected text direction
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### File Management
+- **Save/Load Documents** - Save chord sheets locally and load them later
+- **Export to JSON** - Export documents for backup or sharing
+- **Import from JSON** - Import previously exported documents
+- **Auto-save** - Automatic saving to prevent data loss
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Editing Features
+- **Undo/Redo** - Full history support with keyboard shortcuts (Ctrl+Z / Ctrl+Y)
+- **Copy/Paste** - Standard clipboard operations for lyrics
+- **Multi-line Editing** - Per-line chord and lyrics editing
+- **Chord Deletion** - Easy removal of individual chords
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Output
+- **Print Support** - Clean print output matching A4 format
+- **PDF Export** - Export chord sheets as PDF documents
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Technology Stack
+
+- **Frontend:** React 19 with TypeScript
+- **Build Tool:** Vite 7
+- **Styling:** CSS with A4 page layout simulation
+- **Deployment:** GitHub Pages
+
+## Development
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+
+### Installation
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Development Server
+```bash
+npm run dev
 ```
+Opens the app at http://localhost:5173/chordsheet_studio/
+
+### Build
+```bash
+npm run build
+```
+
+### Deploy to GitHub Pages
+```bash
+npm run deploy
+```
+
+## Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── A4Page.tsx       # A4 document page component
+│   ├── ChordDropdown.tsx # Chord selection dropdown
+│   ├── FileDialog.tsx   # File operations dialog
+│   └── LyricsEditor.tsx # Lyrics text editor with chord support
+├── data/
+│   └── chords.ts        # Comprehensive chord database
+├── styles/              # CSS stylesheets
+├── types/               # TypeScript type definitions
+├── utils/
+│   ├── storage.ts       # Local storage utilities
+│   └── transpose.ts     # Chord transposition logic
+├── App.tsx              # Main application component
+└── main.tsx             # Application entry point
+```
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| Ctrl+Z | Undo |
+| Ctrl+Y | Redo |
+| Ctrl+S | Save document |
+| Ctrl+P | Print |
+
+## Author
+
+**Ofir Nisimi**
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details
