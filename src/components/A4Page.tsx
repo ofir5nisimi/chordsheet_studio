@@ -30,6 +30,7 @@ interface A4PageProps {
   direction?: TextDirection;
   showGrid?: boolean;
   columnCount?: 2 | 3;
+  transposeSemitones?: number;
 }
 
 /**
@@ -65,6 +66,7 @@ const A4Page: React.FC<A4PageProps> = ({
   direction = 'ltr',
   showGrid = false,
   columnCount = 2,
+  transposeSemitones = 0,
 }) => {
   const leftEditorRef = useRef<HTMLDivElement>(null);
   const middleEditorRef = useRef<HTMLDivElement>(null);
@@ -170,6 +172,7 @@ const A4Page: React.FC<A4PageProps> = ({
                 showGrid={showGrid}
                 lineIndicators={leftColumnIndicators}
                 onLineIndicatorsChange={onLeftColumnIndicatorsChange}
+                transposeSemitones={transposeSemitones}
                 placeholder={`Click to add lyrics in ${getColumnLabel('left')} column...`}
               />
             </div>
@@ -194,6 +197,7 @@ const A4Page: React.FC<A4PageProps> = ({
                   showGrid={showGrid}
                   lineIndicators={middleColumnIndicators}
                   onLineIndicatorsChange={onMiddleColumnIndicatorsChange}
+                  transposeSemitones={transposeSemitones}
                   placeholder={`Click to add lyrics in ${getColumnLabel('middle')} column...`}
                 />
               </div>
@@ -218,6 +222,7 @@ const A4Page: React.FC<A4PageProps> = ({
                 showGrid={showGrid}
                 lineIndicators={rightColumnIndicators}
                 onLineIndicatorsChange={onRightColumnIndicatorsChange}
+                transposeSemitones={transposeSemitones}
                 placeholder={`Click to add lyrics in ${getColumnLabel('right')} column...`}
               />
             </div>

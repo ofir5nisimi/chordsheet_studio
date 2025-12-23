@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import ChordDropdown from './ChordDropdown';
 import type { ChordDefinition } from '../data/chords';
 import type { TextDirection } from '../types';
+import { transposeChord, shouldPreferFlats } from '../utils';
 import '../styles/LyricsEditor.css';
 
 /** Represents a placed chord with position info */
@@ -23,6 +24,7 @@ interface LyricsEditorProps {
   showGrid?: boolean;
   lineIndicators?: Set<number>;
   onLineIndicatorsChange?: (indicators: Set<number>) => void;
+  transposeSemitones?: number;
   placeholder?: string;
 }
 
@@ -41,6 +43,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   showGrid = false,
   lineIndicators = new Set(),
   onLineIndicatorsChange,
+  transposeSemitones = 0,
   placeholder = 'Type your lyrics here...',
 }) => {
   const [dropdownPosition, setDropdownPosition] = useState<{ x: number; y: number } | null>(null);
@@ -463,6 +466,10 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
           const position = getCharacterPosition(chord.charIndex) + chord.offsetX;
           // For RTL, position from right; for LTR, position from left
           const positionStyle = isRtl ? { right: position } : { left: position };
+          // Apply transposition to the chord symbol
+          const displaySymbol = transposeSemitones !== 0
+            ? transposeChord(chord.chordSymbol, transposeSemitones, shouldPreferFlats(chord.chordSymbol))
+            : chord.chordSymbol;
           return (
             <div
               key={chord.id}
@@ -473,7 +480,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
               onContextMenu={(e) => handleChordContextMenu(e, chord.id)}
               title={`${chord.chordName} - Drag to move, Right-click to delete`}
             >
-              <span dangerouslySetInnerHTML={{ __html: renderChordSymbol(chord.chordSymbol) }} />
+              <span dangerouslySetInnerHTML={{ __html: renderChordSymbol(displaySymbol) }} />
               {showIndicatorForLine && <span className="chord-indicator">|</span>}
             </div>
           );
@@ -514,7 +521,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
         )}
       </div>
     );
-  }, [getChordsForLine, getCharacterPosition, selectedChordId, draggingChordId, handleChordClick, handleChordDragStart, handleChordContextMenu, chordMode, handleChordRowClick, direction, lineHoverIndex, copiedChords, handleCopyChords, handlePasteChords, lineIndicators, handleToggleLineIndicator]);
+  }, [getChordsForLine, getCharacterPosition, selectedChordId, draggingChordId, handleChordClick, handleChordDragStart, handleChordContextMenu, chordMode, handleChordRowClick, direction, lineHoverIndex, copiedChords, handleCopyChords, handlePasteChords, lineIndicators, handleToggleLineIndicator, transposeSemitones]);
 
   // Render a single line
   const renderLine = useCallback((line: string, lineIndex: number) => {

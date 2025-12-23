@@ -9,8 +9,10 @@ import {
   generateDocumentId,
   exportAsJson,
   importFromJson,
+  transposeChord,
+  shouldPreferFlats,
   type ChordSheetDocument,
-} from './utils/storage';
+} from './utils';
 import './App.css';
 
 /**
@@ -47,6 +49,7 @@ function App() {
   const [middleColumnIndicators, setMiddleColumnIndicators] = useState<Set<number>>(new Set());
   const [rightColumnIndicators, setRightColumnIndicators] = useState<Set<number>>(new Set());
   const [columnCount, setColumnCount] = useState<2 | 3>(2);
+  const [transposeSemitones, setTransposeSemitones] = useState<number>(0);
 
   // Undo/Redo history
   const [history, setHistory] = useState<HistoryState[]>([]);
@@ -650,6 +653,39 @@ function App() {
           )}
         </div>
 
+        {/* Transpose Controls */}
+        <div className="toolbar-section transpose-section">
+          <span className="transpose-label">Transpose:</span>
+          <button
+            className="toolbar-button transpose-btn"
+            onClick={() => setTransposeSemitones(prev => Math.max(-12, prev - 1))}
+            disabled={transposeSemitones <= -12}
+            title="Transpose down by 1 semitone"
+          >
+            −
+          </button>
+          <span className={`transpose-value ${transposeSemitones !== 0 ? 'active' : ''}`}>
+            {transposeSemitones > 0 ? '+' : ''}{transposeSemitones}
+          </span>
+          <button
+            className="toolbar-button transpose-btn"
+            onClick={() => setTransposeSemitones(prev => Math.min(12, prev + 1))}
+            disabled={transposeSemitones >= 12}
+            title="Transpose up by 1 semitone"
+          >
+            +
+          </button>
+          {transposeSemitones !== 0 && (
+            <button
+              className="toolbar-button transpose-reset"
+              onClick={() => setTransposeSemitones(0)}
+              title="Reset to original key"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+
         {/* Status */}
         <div className="toolbar-section status-section">
           {currentFileName && (
@@ -690,6 +726,7 @@ function App() {
           direction={direction}
           showGrid={showGrid}
           columnCount={columnCount}
+          transposeSemitones={transposeSemitones}
         />
       </main>
 
