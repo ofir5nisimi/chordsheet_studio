@@ -3,6 +3,10 @@ import ChordDropdown from './ChordDropdown';
 import type { ChordDefinition } from '../data/chords';
 import type { TextDirection } from '../types';
 import { transposeChord, shouldPreferFlats } from '../utils';
+import { 
+  isSectionLine, 
+  getSectionRange, 
+} from '../data/sections';
 import '../styles/LyricsEditor.css';
 
 /** Represents a placed chord with position info */
@@ -26,6 +30,8 @@ interface LyricsEditorProps {
   onLineIndicatorsChange?: (indicators: Set<number>) => void;
   transposeSemitones?: number;
   placeholder?: string;
+  copiedSection?: { lines: string[]; chords: PlacedChord[] } | null;
+  onCopiedSectionChange?: (section: { lines: string[]; chords: PlacedChord[] } | null) => void;
 }
 
 /**
@@ -45,6 +51,8 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   onLineIndicatorsChange,
   transposeSemitones = 0,
   placeholder = 'Type your lyrics here...',
+  copiedSection = null,
+  onCopiedSectionChange,
 }) => {
   const [dropdownPosition, setDropdownPosition] = useState<{ x: number; y: number } | null>(null);
   const [pendingChordPosition, setPendingChordPosition] = useState<{ lineIndex: number; charIndex: number } | null>(null);
@@ -446,6 +454,93 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
     onLineIndicatorsChange(newIndicators);
   }, [lineIndicators, onLineIndicatorsChange]);
 
+  // ====== Section Handling Functions ======
+
+  // Handle copying an entire section (from section header to next section or end)
+  // Only copies the CONTENT of the section, not the section header itself
+  const handleCopySection = useCallback((sectionLineIndex: number) => {
+    if (!onCopiedSectionChange) return;
+    
+    const { startLine, endLine } = getSectionRange(text, sectionLineIndex);
+    
+    // Get all lines in the section, EXCLUDING the section header (startLine)
+    // Start from startLine + 1 to skip the [Section] line
+    const contentStartLine = startLine + 1;
+    
+    // If there's no content (section header is the only line), don't copy anything
+    if (contentStartLine > endLine) {
+      onCopiedSectionChange({ lines: [], chords: [] });
+      return;
+    }
+    
+    const sectionLines = lines.slice(contentStartLine, endLine + 1);
+    
+    // Get all chords in the section content, adjusting their line indices to be relative
+    const sectionChords = chords
+      .filter(chord => chord.lineIndex >= contentStartLine && chord.lineIndex <= endLine)
+      .map(chord => ({
+        ...chord,
+        lineIndex: chord.lineIndex - contentStartLine, // Make relative to content start
+      }));
+    
+    onCopiedSectionChange({ lines: sectionLines, chords: sectionChords });
+  }, [text, lines, chords, onCopiedSectionChange]);
+
+  // Handle pasting a copied section
+  const handlePasteSection = useCallback((targetLineIndex: number) => {
+    if (!copiedSection) return;
+    
+    const { lines: sectionLines, chords: sectionChords } = copiedSection;
+    
+    // Insert section lines AFTER the target line (not at it)
+    // This prevents duplicating the section header when pasting on a section line
+    const insertIndex = targetLineIndex + 1;
+    const newLines = [...lines];
+    newLines.splice(insertIndex, 0, ...sectionLines);
+    onTextChange(newLines.join('\n'));
+    
+    // Shift existing chords that are at or after the insertion point
+    const shiftAmount = sectionLines.length;
+    const shiftedChords = chords.map(chord => 
+      chord.lineIndex >= insertIndex
+        ? { ...chord, lineIndex: chord.lineIndex + shiftAmount }
+        : chord
+    );
+    
+    // Add the section chords with new IDs and adjusted line indices
+    const newSectionChords = sectionChords.map(chord => ({
+      ...chord,
+      id: generateChordId(),
+      lineIndex: chord.lineIndex + insertIndex,
+    }));
+    
+    onChordsChange([...shiftedChords, ...newSectionChords]);
+  }, [copiedSection, lines, onTextChange, chords, onChordsChange, generateChordId]);
+
+  // Handle deleting an entire section (from section header to next section or end)
+  const handleDeleteSection = useCallback((sectionLineIndex: number) => {
+    const { startLine, endLine } = getSectionRange(text, sectionLineIndex);
+    
+    // Calculate how many lines to remove
+    const linesToRemove = endLine - startLine + 1;
+    
+    // Remove the section lines
+    const newLines = [...lines];
+    newLines.splice(startLine, linesToRemove);
+    onTextChange(newLines.join('\n'));
+    
+    // Remove chords in the section and shift chords after it
+    const updatedChords = chords
+      .filter(chord => chord.lineIndex < startLine || chord.lineIndex > endLine)
+      .map(chord => 
+        chord.lineIndex > endLine
+          ? { ...chord, lineIndex: chord.lineIndex - linesToRemove }
+          : chord
+      );
+    
+    onChordsChange(updatedChords);
+  }, [text, lines, chords, onTextChange, onChordsChange]);
+
   // Render chords for a line
   const renderLineChords = useCallback((lineIndex: number, isChordOnlyLine: boolean = false) => {
     const lineChords = getChordsForLine(lineIndex);
@@ -527,9 +622,25 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   const renderLine = useCallback((line: string, lineIndex: number) => {
     const isEditing = editingLineIndex === lineIndex && !chordMode;
     const isChordOnlyLine = line === '' && getChordsForLine(lineIndex).length > 0;
+    const isSection = isSectionLine(line);
+    
+    // Handle right-click on section line
+    const handleSectionContextMenu = (e: React.MouseEvent) => {
+      if (isSection) {
+        e.preventDefault();
+        setContextMenuPosition({ x: e.clientX, y: e.clientY });
+        setContextMenuChordId(`section-${lineIndex}`); // Use special ID for section context menu
+      }
+    };
     
     return (
-      <div key={lineIndex} className={`lyrics-line ${direction} ${isChordOnlyLine ? 'chord-only-line' : ''}`}>
+      <div 
+        key={lineIndex} 
+        className={`lyrics-line ${direction} ${isChordOnlyLine ? 'chord-only-line' : ''} ${isSection ? 'section-line' : ''}`}
+        onMouseEnter={() => setLineHoverIndex(lineIndex)}
+        onMouseLeave={() => setLineHoverIndex(null)}
+        onContextMenu={isSection ? handleSectionContextMenu : undefined}
+      >
         {/* Chords Row */}
         {renderLineChords(lineIndex, isChordOnlyLine)}
         
@@ -587,7 +698,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
         </div>
       </div>
     );
-  }, [editingLineIndex, chordMode, direction, renderLineChords, handleLineChange, handleLineKeyDown, handleCharClick, getChordsForLine]);
+  }, [editingLineIndex, chordMode, direction, renderLineChords, handleLineChange, handleLineKeyDown, handleCharClick, getChordsForLine, lineHoverIndex, copiedSection, handleCopySection, handlePasteSection]);
 
   // Handle adding new line at end
   const handleAddLine = useCallback(() => {
@@ -706,12 +817,56 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
           style={{ left: contextMenuPosition.x, top: contextMenuPosition.y }}
           onClick={(e) => e.stopPropagation()}
         >
-          <button className="context-menu-item change" onClick={handleChangeChordClick}>
-            ✏️ Change Chord
-          </button>
-          <button className="context-menu-item delete" onClick={handleDeleteClick}>
-            🗑️ Delete Chord
-          </button>
+          {contextMenuChordId?.startsWith('section-') ? (
+            // Section context menu
+            <>
+              <button 
+                className="context-menu-item copy-section" 
+                onClick={() => {
+                  const lineIndex = parseInt(contextMenuChordId.replace('section-', ''), 10);
+                  handleCopySection(lineIndex);
+                  setContextMenuPosition(null);
+                  setContextMenuChordId(null);
+                }}
+              >
+                📋 Copy Section
+              </button>
+              {copiedSection && (
+                <button 
+                  className="context-menu-item paste-section" 
+                  onClick={() => {
+                    const lineIndex = parseInt(contextMenuChordId.replace('section-', ''), 10);
+                    handlePasteSection(lineIndex);
+                    setContextMenuPosition(null);
+                    setContextMenuChordId(null);
+                  }}
+                >
+                  📄 Paste Section Here
+                </button>
+              )}
+              <button 
+                className="context-menu-item delete-section" 
+                onClick={() => {
+                  const lineIndex = parseInt(contextMenuChordId.replace('section-', ''), 10);
+                  handleDeleteSection(lineIndex);
+                  setContextMenuPosition(null);
+                  setContextMenuChordId(null);
+                }}
+              >
+                🗑️ Delete Section
+              </button>
+            </>
+          ) : (
+            // Chord context menu
+            <>
+              <button className="context-menu-item change" onClick={handleChangeChordClick}>
+                ✏️ Change Chord
+              </button>
+              <button className="context-menu-item delete" onClick={handleDeleteClick}>
+                🗑️ Delete Chord
+              </button>
+            </>
+          )}
         </div>
       )}
 

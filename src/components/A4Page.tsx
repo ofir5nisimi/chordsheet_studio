@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useMemo } from 'react';
+import React, { useRef, useCallback, useMemo, useState } from 'react';
 import LyricsEditor, { type PlacedChord } from './LyricsEditor';
 import '../styles/A4Page.css';
 import type { TextDirection } from '../types';
@@ -71,6 +71,9 @@ const A4Page: React.FC<A4PageProps> = ({
   const leftEditorRef = useRef<HTMLDivElement>(null);
   const middleEditorRef = useRef<HTMLDivElement>(null);
   const rightEditorRef = useRef<HTMLDivElement>(null);
+  
+  // Shared section clipboard across all columns
+  const [copiedSection, setCopiedSection] = useState<{ lines: string[]; chords: PlacedChord[] } | null>(null);
 
   // Calculate line counts and overflow status
   const leftLineCount = useMemo(() => leftColumnText.split('\n').length, [leftColumnText]);
@@ -156,6 +159,8 @@ const A4Page: React.FC<A4PageProps> = ({
                 onLineIndicatorsChange={onLeftColumnIndicatorsChange}
                 transposeSemitones={transposeSemitones}
                 placeholder={`Click to add lyrics in ${getColumnLabel('left')} column...`}
+                copiedSection={copiedSection}
+                onCopiedSectionChange={setCopiedSection}
               />
             </div>
 
@@ -178,6 +183,8 @@ const A4Page: React.FC<A4PageProps> = ({
                   onLineIndicatorsChange={onMiddleColumnIndicatorsChange}
                   transposeSemitones={transposeSemitones}
                   placeholder={`Click to add lyrics in ${getColumnLabel('middle')} column...`}
+                  copiedSection={copiedSection}
+                  onCopiedSectionChange={setCopiedSection}
                 />
               </div>
             )}
@@ -200,6 +207,8 @@ const A4Page: React.FC<A4PageProps> = ({
                 onLineIndicatorsChange={onRightColumnIndicatorsChange}
                 transposeSemitones={transposeSemitones}
                 placeholder={`Click to add lyrics in ${getColumnLabel('right')} column...`}
+                copiedSection={copiedSection}
+                onCopiedSectionChange={setCopiedSection}
               />
             </div>
           </div>

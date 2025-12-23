@@ -455,6 +455,23 @@
   background-color: #ffebee;
 }
 
+/* Section context menu items */
+.context-menu-item.copy-section {
+  color: #1565c0;
+}
+
+.context-menu-item.copy-section:hover {
+  background-color: #e3f2fd;
+}
+
+.context-menu-item.paste-section {
+  color: #2e7d32;
+}
+
+.context-menu-item.paste-section:hover {
+  background-color: #e8f5e9;
+}
+
 /* Delete Confirmation Dialog */
 .delete-confirm-overlay {
   position: fixed;
@@ -596,5 +613,26 @@
   .line-input {
     background: transparent !important;
     padding: 0 !important;
+  }
+}
+
+/* ====== Section Styles ====== */
+
+/* Section Line - subtle styling for [Section] markers */
+.lyrics-line.section-line {
+  position: relative;
+}
+
+/* Make section text bold but subtle */
+.section-line .line-text-display,
+.section-line .line-input {
+  font-weight: 600;
+  color: #555;
+}
+
+/* Print styles for sections */
+@media print {
+  .no-print {
+    display: none !important;
   }
 }
