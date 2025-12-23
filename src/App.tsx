@@ -547,13 +547,16 @@ function App() {
     <div className={`app ${direction}`} dir={direction}>
       {/* Toolbar */}
       <header className="toolbar">
-        {/* Top Row */}
-        <div className="toolbar-row toolbar-row-main">
+        {/* Branding Row */}
+        <div className="toolbar-row toolbar-row-branding">
           <div className="app-branding">
             <h1 className="app-title">Guitar Chords Sheet</h1>
             <span className="app-author">By Ofir Nisimi</span>
           </div>
-        
+        </div>
+
+        {/* Main Buttons Row */}
+        <div className="toolbar-row toolbar-row-main">
           {/* File Actions */}
           <div className="toolbar-section file-actions">
           <button
@@ -649,7 +652,7 @@ function App() {
             aria-label={`Switch to ${columnCount === 2 ? '3' : '2'} columns`}
             title="Toggle 3rd Column"
           >
-            {columnCount === 2 ? '⊞ Columns 2' : '⊟ Columns 3'}
+            {columnCount === 2 ? '⊞ 2 Columns' : '⊟ 3 Columns'}
           </button>
           <button
             className={`toolbar-button direction-toggle ${direction === 'rtl' ? 'active' : ''}`}
