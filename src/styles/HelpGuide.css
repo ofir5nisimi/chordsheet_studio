@@ -1,0 +1,274 @@
+/* Help Guide Styles */
+
+.help-guide-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  padding: 20px;
+  backdrop-filter: blur(2px);
+}
+
+.help-guide-modal {
+  background: white;
+  border-radius: 12px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.help-guide-modal.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.help-guide-modal.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+.help-guide-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-radius: 12px 12px 0 0;
+}
+
+.help-guide-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.help-guide-header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.help-guide-lang-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.help-guide-lang-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.02);
+}
+
+.help-guide-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.help-guide-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.help-guide-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.help-section {
+  margin-bottom: 24px;
+}
+
+.help-section:last-child {
+  margin-bottom: 0;
+}
+
+.help-section h3 {
+  font-size: 1.15rem;
+  color: #1e40af;
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e7ff;
+}
+
+.help-section p {
+  margin: 0 0 12px 0;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.help-section ul {
+  margin: 0;
+  padding-left: 24px;
+  list-style-type: disc;
+}
+
+.help-guide-modal.rtl .help-section ul {
+  padding-left: 0;
+  padding-right: 24px;
+}
+
+.help-section li {
+  margin-bottom: 8px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.help-section li strong {
+  color: #1f2937;
+}
+
+.help-section code {
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.95em;
+  color: #2563eb;
+  border: 1px solid #e5e7eb;
+}
+
+.help-section kbd {
+  display: inline-block;
+  background: linear-gradient(180deg, #f9fafb 0%, #e5e7eb 100%);
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.85em;
+  color: #374151;
+  box-shadow: 0 2px 0 #9ca3af;
+  margin: 0 2px;
+}
+
+.help-guide-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: center;
+  background: #f9fafb;
+  border-radius: 0 0 12px 12px;
+}
+
+.help-guide-close-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 10px 32px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.help-guide-close-btn:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* Help button in toolbar */
+.help-button {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+  color: white !important;
+  font-weight: bold;
+  width: 32px;
+  height: 32px;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem !important;
+  padding: 0 !important;
+  min-width: 32px !important;
+}
+
+.help-button:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
+  transform: scale(1.1);
+}
+
+/* Scrollbar styling for help content */
+.help-guide-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.help-guide-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.help-guide-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.help-guide-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .help-guide-modal {
+    max-height: 90vh;
+    margin: 10px;
+  }
+
+  .help-guide-header {
+    padding: 16px 20px;
+  }
+
+  .help-guide-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .help-guide-content {
+    padding: 16px;
+  }
+
+  .help-section h3 {
+    font-size: 1.05rem;
+  }
+}

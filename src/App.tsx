@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { A4Page, FileDialog } from './components';
+import { A4Page, FileDialog, HelpGuide } from './components';
 import type { PlacedChord } from './components';
 import type { TextDirection } from './types';
 import {
@@ -62,6 +62,7 @@ function App() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [showNewConfirm, setShowNewConfirm] = useState(false);
+  const [showHelpGuide, setShowHelpGuide] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'unsaved' | 'saving' | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
@@ -553,6 +554,17 @@ function App() {
             <h1 className="app-title">Guitar Chords Sheet</h1>
             <span className="app-author">By Ofir Nisimi</span>
           </div>
+          <button
+            className="toolbar-button help-button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setShowHelpGuide(true);
+            }}
+            title="Help Guide"
+          >
+            ?
+          </button>
         </div>
 
         {/* Main Buttons Row */}
@@ -773,6 +785,13 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Help Guide */}
+      <HelpGuide
+        isOpen={showHelpGuide}
+        onClose={() => setShowHelpGuide(false)}
+        direction={direction}
+      />
     </div>
   );
 }
