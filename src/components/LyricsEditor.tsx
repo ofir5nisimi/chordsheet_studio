@@ -32,6 +32,8 @@ interface LyricsEditorProps {
   placeholder?: string;
   copiedSection?: { lines: string[]; chords: PlacedChord[] } | null;
   onCopiedSectionChange?: (section: { lines: string[]; chords: PlacedChord[] } | null) => void;
+  copiedChords?: PlacedChord[] | null;
+  onCopiedChordsChange?: (chords: PlacedChord[] | null) => void;
 }
 
 /**
@@ -53,6 +55,8 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   placeholder = 'Type your lyrics here...',
   copiedSection = null,
   onCopiedSectionChange,
+  copiedChords = null,
+  onCopiedChordsChange,
 }) => {
   const [dropdownPosition, setDropdownPosition] = useState<{ x: number; y: number } | null>(null);
   const [pendingChordPosition, setPendingChordPosition] = useState<{ lineIndex: number; charIndex: number } | null>(null);
@@ -66,7 +70,6 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const [contextMenuChordId, setContextMenuChordId] = useState<string | null>(null);
   const [editingChordId, setEditingChordId] = useState<string | null>(null);
-  const [copiedChords, setCopiedChords] = useState<PlacedChord[] | null>(null);
   const [lineHoverIndex, setLineHoverIndex] = useState<number | null>(null);
   
   const editorRef = useRef<HTMLDivElement>(null);
@@ -420,11 +423,11 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   // Handle copying chords from a line
   const handleCopyChords = useCallback((lineIndex: number) => {
     const lineChords = getChordsForLine(lineIndex);
-    if (lineChords.length > 0) {
-      setCopiedChords(lineChords);
+    if (lineChords.length > 0 && onCopiedChordsChange) {
+      onCopiedChordsChange(lineChords);
       setContextMenuPosition(null);
     }
-  }, [getChordsForLine]);
+  }, [getChordsForLine, onCopiedChordsChange]);
 
   // Handle pasting chords to a line
   const handlePasteChords = useCallback((targetLineIndex: number) => {

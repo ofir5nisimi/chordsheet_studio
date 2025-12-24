@@ -74,6 +74,9 @@ const A4Page: React.FC<A4PageProps> = ({
   
   // Shared section clipboard across all columns
   const [copiedSection, setCopiedSection] = useState<{ lines: string[]; chords: PlacedChord[] } | null>(null);
+  
+  // Shared chord clipboard across all columns
+  const [copiedChords, setCopiedChords] = useState<PlacedChord[] | null>(null);
 
   // Calculate line counts and overflow status
   const leftLineCount = useMemo(() => leftColumnText.split('\n').length, [leftColumnText]);
@@ -161,6 +164,8 @@ const A4Page: React.FC<A4PageProps> = ({
                 placeholder={`Click to add lyrics in ${getColumnLabel('left')} column...`}
                 copiedSection={copiedSection}
                 onCopiedSectionChange={setCopiedSection}
+                copiedChords={copiedChords}
+                onCopiedChordsChange={setCopiedChords}
               />
             </div>
 
@@ -185,6 +190,8 @@ const A4Page: React.FC<A4PageProps> = ({
                   placeholder={`Click to add lyrics in ${getColumnLabel('middle')} column...`}
                   copiedSection={copiedSection}
                   onCopiedSectionChange={setCopiedSection}
+                  copiedChords={copiedChords}
+                  onCopiedChordsChange={setCopiedChords}
                 />
               </div>
             )}
@@ -209,6 +216,8 @@ const A4Page: React.FC<A4PageProps> = ({
                 placeholder={`Click to add lyrics in ${getColumnLabel('right')} column...`}
                 copiedSection={copiedSection}
                 onCopiedSectionChange={setCopiedSection}
+                copiedChords={copiedChords}
+                onCopiedChordsChange={setCopiedChords}
               />
             </div>
           </div>
