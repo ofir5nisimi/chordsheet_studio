@@ -1,5 +1,5 @@
 /**
- * Type definitions for Guitar Chords Sheet application
+ * Type definitions for ChordSheet Studio application
  */
 
 /** Represents a chord placed above lyrics text */

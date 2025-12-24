@@ -14,7 +14,7 @@ import {
 import './App.css';
 
 /**
- * Guitar Chords Sheet Application
+ * ChordSheet Studio Application
  * 
  * Main application component that manages the chord sheet state
  * and renders the A4 page editor.
@@ -552,14 +552,13 @@ function App() {
         {/* Branding Row */}
         <div className="toolbar-row toolbar-row-branding">
           <div className="app-branding">
-            <h1 className="app-title">Guitar Chords Sheet</h1>
+            <h1 className="app-title">ChordSheet Studio</h1>
             <span className="app-author">By Ofir Nisimi</span>
           </div>
           <button
             className="toolbar-button help-button"
             onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
+              (e.currentTarget as HTMLButtonElement).blur();
               setShowHelpGuide(true);
             }}
             title="Help Guide"

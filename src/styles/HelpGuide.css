@@ -230,6 +230,15 @@
   transform: scale(1.1);
 }
 
+.help-button:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.help-button:active {
+  transform: scale(0.95);
+}
+
 /* Scrollbar styling for help content */
 .help-guide-content::-webkit-scrollbar {
   width: 8px;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/HelpGuide.css';
 
 interface HelpGuideProps {
@@ -16,6 +16,20 @@ interface HelpGuideProps {
 const HelpGuide: React.FC<HelpGuideProps> = ({ isOpen, onClose }) => {
   // Internal language state - always starts as English
   const [language, setLanguage] = useState<'en' | 'he'>('en');
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
   
   if (!isOpen) return null;
 
@@ -77,7 +91,7 @@ const HelpGuide: React.FC<HelpGuideProps> = ({ isOpen, onClose }) => {
             // Hebrew Guide
             <>
               <section className="help-section">
-                <h3>🎸 ברוכים הבאים ל-Guitar Chords Sheet</h3>
+                <h3>� ברוכים הבאים ל-ChordSheet Studio</h3>
                 <p>אפליקציה ליצירת דפי אקורדים עם מילים לשירים. ניתן למקם אקורדים מעל המילים, לארגן בעזרת סקשנים, ולייצא ל-PDF.</p>
               </section>
 
@@ -179,7 +193,7 @@ const HelpGuide: React.FC<HelpGuideProps> = ({ isOpen, onClose }) => {
             // English Guide
             <>
               <section className="help-section">
-                <h3>🎸 Welcome to Guitar Chords Sheet</h3>
+                <h3>� Welcome to ChordSheet Studio</h3>
                 <p>An application for creating chord sheets with lyrics for songs. You can position chords above lyrics, organize with sections, and export to PDF.</p>
               </section>
 
