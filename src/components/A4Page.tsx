@@ -30,6 +30,7 @@ interface A4PageProps {
   direction?: TextDirection;
   showGrid?: boolean;
   columnCount?: 2 | 3;
+  showColumnSeparators?: boolean;
   transposeSemitones?: number;
 }
 
@@ -66,6 +67,7 @@ const A4Page: React.FC<A4PageProps> = ({
   direction = 'ltr',
   showGrid = false,
   columnCount = 2,
+  showColumnSeparators = true,
   transposeSemitones = 0,
 }) => {
   const leftEditorRef = useRef<HTMLDivElement>(null);
@@ -143,7 +145,7 @@ const A4Page: React.FC<A4PageProps> = ({
           </div>
 
           {/* Columns Layout */}
-          <div className={`columns-container columns-${columnCount} ${direction}`}>
+          <div className={`columns-container columns-${columnCount} ${direction} ${!showColumnSeparators ? 'no-separators' : ''}`}>
             {/* Left Column */}
             <div className={`column ${leftOverflow ? 'overflow' : ''}`} ref={leftEditorRef}>
               {leftOverflow && (

@@ -120,10 +120,16 @@
 
 .status-section {
   position: absolute;
-  right: 0;
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  gap: 12px;
+  gap: 8px;
+}
+
+/* RTL: status section on the left */
+.app.rtl .status-section {
+  right: auto;
+  left: 16px;
 }
 
 /* Toolbar Divider */

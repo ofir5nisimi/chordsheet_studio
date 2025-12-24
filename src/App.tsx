@@ -47,6 +47,7 @@ function App() {
   const [middleColumnIndicators, setMiddleColumnIndicators] = useState<Set<number>>(new Set());
   const [rightColumnIndicators, setRightColumnIndicators] = useState<Set<number>>(new Set());
   const [columnCount, setColumnCount] = useState<2 | 3>(2);
+  const [showColumnSeparators, setShowColumnSeparators] = useState(true);
   const [transposeSemitones, setTransposeSemitones] = useState<number>(0);
 
   // Undo/Redo history
@@ -639,19 +640,6 @@ function App() {
             onChange={handleFileImport}
           />
         </div>
-
-          {/* Status */}
-          <div className="toolbar-section status-section">
-            {currentFileName && (
-              <span className="current-file" title={currentFileName}>
-                {currentFileName}
-              </span>
-            )}
-            {saveStatus === 'saved' && <span className="save-status saved">✓ Saved</span>}
-            {saveStatus === 'unsaved' && <span className="save-status unsaved">● Unsaved</span>}
-            {saveStatus === 'saving' && <span className="save-status saving">⏳ Saving...</span>}
-            {statusMessage && <span className="status-message">{statusMessage}</span>}
-          </div>
         </div>
 
         {/* Bottom Row */}
@@ -665,6 +653,13 @@ function App() {
             title="Toggle 3rd Column"
           >
             {columnCount === 2 ? '⊞ 2 Columns' : '⊟ 3 Columns'}
+          </button>
+          <button
+            className={`toolbar-button ${showColumnSeparators ? 'active' : ''}`}
+            onClick={() => setShowColumnSeparators(prev => !prev)}
+            title="Toggle column separator lines in print"
+          >
+            {showColumnSeparators ? '┃ Lines On' : '┃ Lines Off'}
           </button>
           <button
             className={`toolbar-button direction-toggle ${direction === 'rtl' ? 'active' : ''}`}
@@ -708,6 +703,19 @@ function App() {
             </button>
           )}
         </div>
+
+          {/* Status */}
+          <div className="toolbar-section status-section">
+            {currentFileName && (
+              <span className="current-file" title={currentFileName}>
+                {currentFileName}
+              </span>
+            )}
+            {saveStatus === 'saved' && <span className="save-status saved">✓ Saved</span>}
+            {saveStatus === 'unsaved' && <span className="save-status unsaved">● Unsaved</span>}
+            {saveStatus === 'saving' && <span className="save-status saving">⏳ Saving...</span>}
+            {statusMessage && <span className="status-message">{statusMessage}</span>}
+          </div>
         </div>
       </header>
 
@@ -737,6 +745,7 @@ function App() {
           direction={direction}
           showGrid={showGrid}
           columnCount={columnCount}
+          showColumnSeparators={showColumnSeparators}
           transposeSemitones={transposeSemitones}
         />
       </main>

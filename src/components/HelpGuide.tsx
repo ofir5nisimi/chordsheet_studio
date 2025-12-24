@@ -149,6 +149,7 @@ const HelpGuide: React.FC<HelpGuideProps> = ({ isOpen, onClose }) => {
                   <li>לחצו על "Print" או Ctrl+P</li>
                   <li>בחרו "Save as PDF" כמדפסת</li>
                   <li>הדף יודפס בפורמט A4</li>
+                  <li><strong>קווי הפרדה:</strong> לחצו על "┃ Lines" כדי להציג/להסתיר קווים מפרידים בין העמודות בהדפסה</li>
                 </ul>
               </section>
 
@@ -250,6 +251,7 @@ const HelpGuide: React.FC<HelpGuideProps> = ({ isOpen, onClose }) => {
                   <li>Click "Print" or Ctrl+P</li>
                   <li>Select "Save as PDF" as printer</li>
                   <li>Page will be printed in A4 format</li>
+                  <li><strong>Separator lines:</strong> Click "┃ Lines" to show/hide vertical separator lines between columns in print</li>
                 </ul>
               </section>
 
