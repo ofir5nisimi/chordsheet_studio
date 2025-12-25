@@ -224,12 +224,22 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
     setSelectedChordId(selectedChordId === chordId ? null : chordId);
   }, [selectedChordId]);
 
-  // Handle chord drag start
+  // Handle chord drag start (mouse)
   const handleChordDragStart = useCallback((e: React.MouseEvent, chord: PlacedChord) => {
     e.preventDefault();
     e.stopPropagation();
     setDraggingChordId(chord.id);
     setDragStartX(e.clientX);
+    setDragStartOffset(chord.offsetX);
+    setSelectedChordId(chord.id);
+  }, []);
+
+  // Handle chord drag start (touch)
+  const handleChordTouchStart = useCallback((e: React.TouchEvent, chord: PlacedChord) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    setDraggingChordId(chord.id);
+    setDragStartX(touch.clientX);
     setDragStartOffset(chord.offsetX);
     setSelectedChordId(chord.id);
   }, []);
@@ -282,16 +292,55 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
       }
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - dragStartX;
+        // For RTL, invert the drag direction since we use 'right' positioning
+        const adjustedDelta = direction === 'rtl' ? -deltaX : deltaX;
+        let newOffset = dragStartOffset + adjustedDelta;
+        
+        // Constrain to column boundaries
+        const chord = chords.find(c => c.id === draggingChordId);
+        if (chord && editorRef.current) {
+          const columnWidth = editorRef.current.offsetWidth;
+          const charPosition = chord.charIndex * 8.4;
+          const padding = 5;
+          const minOffset = -charPosition - padding;
+          const maxOffset = columnWidth - charPosition + padding;
+          newOffset = Math.max(minOffset, Math.min(maxOffset, newOffset));
+        }
+        
+        onChordsChange(
+          chords.map(c => 
+            c.id === draggingChordId 
+              ? { ...c, offsetX: newOffset }
+              : c
+          )
+        );
+      }
+    };
+
+    const handleTouchEnd = () => {
+      setDraggingChordId(null);
+    };
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
     document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd);
+    document.addEventListener('touchcancel', handleTouchEnd);
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [draggingChordId, dragStartX, dragStartOffset, chords, onChordsChange]);
+  }, [draggingChordId, dragStartX, dragStartOffset, chords, onChordsChange, direction]);
 
   // Handle right-click context menu
   const handleChordContextMenu = useCallback((e: React.MouseEvent, chordId: string) => {
@@ -575,6 +624,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
               style={positionStyle}
               onClick={(e) => handleChordClick(e, chord.id)}
               onMouseDown={(e) => handleChordDragStart(e, chord)}
+              onTouchStart={(e) => handleChordTouchStart(e, chord)}
               onContextMenu={(e) => handleChordContextMenu(e, chord.id)}
               title={`${chord.chordName} - Drag to move, Right-click to delete`}
             >
@@ -619,7 +669,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
         )}
       </div>
     );
-  }, [getChordsForLine, getCharacterPosition, selectedChordId, draggingChordId, handleChordClick, handleChordDragStart, handleChordContextMenu, chordMode, handleChordRowClick, direction, lineHoverIndex, copiedChords, handleCopyChords, handlePasteChords, lineIndicators, handleToggleLineIndicator, transposeSemitones]);
+  }, [getChordsForLine, getCharacterPosition, selectedChordId, draggingChordId, handleChordClick, handleChordDragStart, handleChordTouchStart, handleChordContextMenu, chordMode, handleChordRowClick, direction, lineHoverIndex, copiedChords, handleCopyChords, handlePasteChords, lineIndicators, handleToggleLineIndicator, transposeSemitones]);
 
   // Render a single line
   const renderLine = useCallback((line: string, lineIndex: number) => {
