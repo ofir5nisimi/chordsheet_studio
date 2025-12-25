@@ -160,10 +160,10 @@ const HelpGuide: React.FC<HelpGuideProps> = ({ isOpen, onClose }) => {
               <section className="help-section">
                 <h3>🖨️ הדפסה ל-PDF</h3>
                 <ul>
-                  <li>לחצו על "Print" או Ctrl+P</li>
-                  <li>בחרו "Save as PDF" כמדפסת</li>
+                  <li><strong>Save PDF:</strong> לחצו לשמירת קובץ PDF ישירות למחשב</li>
+                  <li><strong>Print:</strong> לחצו לפתיחת חלון ההדפסה (או Ctrl+P)</li>
                   <li>הדף יודפס בפורמט A4</li>
-                  <li><strong>קווי הפרדה:</strong> לחצו על "┃ Lines" כדי להציג/להסתיר קווים מפרידים בין העמודות בהדפסה</li>
+                  <li><strong>קווי הפרדה:</strong> לחצו על "┃ Lines" כדי להציג/להסתיר קווים מפרידים בין העמודות</li>
                 </ul>
               </section>
 
@@ -260,12 +260,12 @@ const HelpGuide: React.FC<HelpGuideProps> = ({ isOpen, onClose }) => {
               </section>
 
               <section className="help-section">
-                <h3>🖨️ Print to PDF</h3>
+                <h3>🖨️ Save to PDF</h3>
                 <ul>
-                  <li>Click "Print" or Ctrl+P</li>
-                  <li>Select "Save as PDF" as printer</li>
-                  <li>Page will be printed in A4 format</li>
-                  <li><strong>Separator lines:</strong> Click "┃ Lines" to show/hide vertical separator lines between columns in print</li>
+                  <li><strong>Save PDF:</strong> Click to save directly as a PDF file to your computer</li>
+                  <li><strong>Print:</strong> Click to open print dialog (or Ctrl+P)</li>
+                  <li>Page will be exported in A4 format</li>
+                  <li><strong>Separator lines:</strong> Click "┃ Lines" to show/hide vertical separator lines between columns</li>
                 </ul>
               </section>
 

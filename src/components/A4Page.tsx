@@ -147,7 +147,7 @@ const A4Page: React.FC<A4PageProps> = ({
           {/* Columns Layout */}
           <div className={`columns-container columns-${columnCount} ${direction} ${!showColumnSeparators ? 'no-separators' : ''}`}>
             {/* Left Column */}
-            <div className={`column ${leftOverflow ? 'overflow' : ''}`} ref={leftEditorRef}>
+            <div className={`column column-left ${leftOverflow ? 'overflow' : ''}`} ref={leftEditorRef}>
               {leftOverflow && (
                 <div className="overflow-indicator" title="Content exceeds page - move to next column">
                   ⚠️ Overflow - Move to next column
@@ -173,7 +173,7 @@ const A4Page: React.FC<A4PageProps> = ({
 
             {/* Middle Column (only shown when columnCount is 3) */}
             {columnCount === 3 && (
-              <div className={`column ${middleOverflow ? 'overflow' : ''}`} ref={middleEditorRef}>
+              <div className={`column column-middle ${middleOverflow ? 'overflow' : ''}`} ref={middleEditorRef}>
                 {middleOverflow && (
                   <div className="overflow-indicator" title="Content exceeds page - move to next column">
                     ⚠️ Overflow - Move to next column
@@ -199,7 +199,7 @@ const A4Page: React.FC<A4PageProps> = ({
             )}
 
             {/* Right Column */}
-            <div className={`column ${rightOverflow ? 'overflow' : ''}`} ref={rightEditorRef}>
+            <div className={`column column-right ${rightOverflow ? 'overflow' : ''}`} ref={rightEditorRef}>
               {rightOverflow && (
                 <div className="overflow-indicator" title="Content exceeds page - move to next column">
                   ⚠️ Overflow - Move to next column

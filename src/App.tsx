@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { A4Page, FileDialog, HelpGuide } from './components';
 import type { PlacedChord } from './components';
 import type { TextDirection } from './types';
@@ -64,12 +66,15 @@ function App() {
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [showNewConfirm, setShowNewConfirm] = useState(false);
   const [showHelpGuide, setShowHelpGuide] = useState(false);
+  const [showPdfDialog, setShowPdfDialog] = useState(false);
+  const [pdfFilename, setPdfFilename] = useState('');
   const [saveStatus, setSaveStatus] = useState<'saved' | 'unsaved' | 'saving' | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   // Auto-save timer ref
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastChangeRef = useRef<number>(0);
+  const a4PageRef = useRef<HTMLDivElement>(null);
 
   // Track changes
   useEffect(() => {
@@ -413,6 +418,145 @@ function App() {
     window.print();
   }, []);
 
+  // Open PDF save dialog
+  const handleSavePdf = useCallback(() => {
+    // Set default filename from title or current file name
+    const defaultName = (title || currentFileName || 'ChordSheet').replace(/[^a-zA-Z0-9-_\s\u0590-\u05FF]/g, '').trim();
+    setPdfFilename(defaultName);
+    setShowPdfDialog(true);
+  }, [title, currentFileName]);
+
+  // Actually generate and save the PDF
+  const performPdfSave = useCallback(async (filename: string) => {
+    const element = a4PageRef.current?.querySelector('.a4-page') as HTMLElement;
+    if (!element) {
+      showStatusMessage('Error: Could not find page to export');
+      return;
+    }
+
+    const finalFilename = (filename || 'ChordSheet').trim() + '.pdf';
+    
+    showStatusMessage('Generating PDF...');
+    setShowPdfDialog(false);
+    
+    // Store original styles
+    const originalWidth = element.style.width;
+    const originalHeight = element.style.height;
+    const originalMinHeight = element.style.minHeight;
+    const originalPadding = element.style.padding;
+    const originalBoxShadow = element.style.boxShadow;
+    const originalOverflow = element.style.overflow;
+    
+    // Add class to body to hide UI elements via CSS
+    document.body.classList.add('pdf-export-mode');
+    
+    // Get columns container and check settings
+    const columnsContainer = element.querySelector('.columns-container') as HTMLElement;
+    const isRtl = columnsContainer?.classList.contains('rtl');
+    const hasSeparators = !columnsContainer?.classList.contains('no-separators');
+    const originalColumns = columnsContainer ? Array.from(columnsContainer.children) as HTMLElement[] : [];
+    
+    // Hide CSS pseudo-element separators - we'll add real DOM elements instead
+    columnsContainer?.classList.add('no-separators');
+    
+    if (isRtl && columnsContainer && originalColumns.length > 0) {
+      // Remove RTL class and set normal row direction
+      columnsContainer.classList.remove('rtl');
+      columnsContainer.style.flexDirection = 'row';
+      // Reverse columns in DOM so they appear in correct visual order for RTL
+      [...originalColumns].reverse().forEach(col => columnsContainer.appendChild(col));
+    }
+    
+    // Set element to A4 dimensions for capture
+    element.style.width = '794px';
+    element.style.height = 'auto';
+    element.style.minHeight = 'auto';
+    element.style.padding = '40px';
+    element.style.boxShadow = 'none';
+    element.style.overflow = 'visible';
+    
+    // Wait for layout to apply
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Insert real separator divs between columns if separators are enabled
+    const separatorElements: HTMLElement[] = [];
+    if (hasSeparators && columnsContainer) {
+      const columns = Array.from(columnsContainer.children) as HTMLElement[];
+      // Insert separator after each column except the last
+      for (let i = 0; i < columns.length - 1; i++) {
+        const separator = document.createElement('div');
+        separator.className = 'pdf-separator';
+        separator.style.cssText = 'width: 1px; background-color: #d8d8d8; flex-shrink: 0; align-self: stretch;';
+        columns[i].after(separator);
+        separatorElements.push(separator);
+      }
+    }
+    
+    // Wait for separators to render
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    try {
+      // Capture the element with html2canvas
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        windowWidth: 794,
+        scrollX: 0,
+        scrollY: 0,
+      });
+      
+      // Create PDF with A4 dimensions (210mm x 297mm)
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+      
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const canvasAspectRatio = canvas.height / canvas.width;
+      const imgWidth = pdfWidth;
+      const imgHeight = pdfWidth * canvasAspectRatio;
+      
+      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, Math.min(imgHeight, pdfHeight));
+      pdf.save(finalFilename);
+      
+      showStatusMessage('PDF saved successfully!');
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      showStatusMessage('Error generating PDF');
+    } finally {
+      // Remove separator elements
+      separatorElements.forEach(sep => sep.remove());
+      
+      // Restore original state
+      element.style.width = originalWidth;
+      element.style.height = originalHeight;
+      element.style.minHeight = originalMinHeight;
+      element.style.padding = originalPadding;
+      element.style.boxShadow = originalBoxShadow;
+      element.style.overflow = originalOverflow;
+      
+      // Restore separator visibility
+      if (hasSeparators) {
+        columnsContainer?.classList.remove('no-separators');
+      }
+      
+      if (isRtl && columnsContainer && originalColumns.length > 0) {
+        // Restore RTL class
+        columnsContainer.classList.add('rtl');
+        columnsContainer.style.flexDirection = '';
+        // Restore original column order
+        originalColumns.forEach(col => columnsContainer.appendChild(col));
+      }
+      document.body.classList.remove('pdf-export-mode');
+    }
+  }, [showStatusMessage]);
+
   // Export to file (JSON)
   const handleExportToFile = useCallback(() => {
     const docId = currentDocId || generateDocumentId();
@@ -599,6 +743,13 @@ function App() {
           >
             🖨️ Print
           </button>
+          <button
+            className="toolbar-button"
+            onClick={handleSavePdf}
+            title="Save directly as PDF file"
+          >
+            📑 Save PDF
+          </button>
           <span className="toolbar-divider">|</span>
           <button
             className={`toolbar-button ${!canUndo ? 'disabled' : ''}`}
@@ -719,7 +870,7 @@ function App() {
       </header>
 
       {/* Main Editor */}
-      <main className="editor">
+      <main className="editor" ref={a4PageRef}>
         <A4Page
           title={title}
           onTitleChange={setTitle}
@@ -786,6 +937,45 @@ function App() {
               <button
                 className="confirm-no"
                 onClick={() => setShowNewConfirm(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PDF Filename Dialog */}
+      {showPdfDialog && (
+        <div className="confirm-overlay" onClick={() => setShowPdfDialog(false)}>
+          <div className="confirm-dialog pdf-dialog" onClick={(e) => e.stopPropagation()}>
+            <p>Save as PDF</p>
+            <input
+              type="text"
+              className="pdf-filename-input"
+              value={pdfFilename}
+              onChange={(e) => setPdfFilename(e.target.value)}
+              placeholder="Enter filename"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && pdfFilename.trim()) {
+                  performPdfSave(pdfFilename);
+                } else if (e.key === 'Escape') {
+                  setShowPdfDialog(false);
+                }
+              }}
+            />
+            <div className="confirm-buttons">
+              <button
+                className="confirm-yes"
+                onClick={() => performPdfSave(pdfFilename)}
+                disabled={!pdfFilename.trim()}
+              >
+                Save
+              </button>
+              <button
+                className="confirm-no"
+                onClick={() => setShowPdfDialog(false)}
               >
                 Cancel
               </button>

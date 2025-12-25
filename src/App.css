@@ -309,6 +309,11 @@
   background-color: #c0392b;
 }
 
+.confirm-yes:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
 .confirm-no {
   background-color: #e0e0e0;
   color: #333;
@@ -316,6 +321,209 @@
 
 .confirm-no:hover {
   background-color: #bdbdbd;
+}
+
+/* PDF Dialog Styles */
+.pdf-dialog {
+  min-width: 320px;
+  max-width: 400px;
+}
+
+.pdf-dialog .confirm-yes {
+  background-color: #27ae60;
+}
+
+.pdf-dialog .confirm-yes:hover {
+  background-color: #229954;
+}
+
+.pdf-dialog-hint {
+  font-size: 12px;
+  color: #666;
+  margin: -10px 0 16px 0;
+  line-height: 1.4;
+}
+
+.pdf-filename-input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.pdf-filename-input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+/* PDF Export Mode - Hide UI elements during PDF generation */
+.pdf-export-mode .chord-mode-toggle,
+.pdf-export-mode .chord-only-line-btn,
+.pdf-export-mode .chord-line-actions,
+.pdf-export-mode .copy-chords-btn,
+.pdf-export-mode .paste-chords-btn,
+.pdf-export-mode .active-indicator,
+.pdf-export-mode .overflow-indicator,
+.pdf-export-mode .new-page-indicator,
+.pdf-export-mode .add-column-btn,
+.pdf-export-mode .page-controls,
+.pdf-export-mode .toolbar,
+.pdf-export-mode .confirm-overlay,
+.pdf-export-mode .add-line-area {
+  display: none !important;
+}
+
+/* PDF Export Mode - Replicate print layout for accurate PDF generation */
+.pdf-export-mode .a4-page-container {
+  padding: 0;
+  background-color: #ffffff;
+  min-height: auto;
+}
+
+.pdf-export-mode .a4-page {
+  box-shadow: none;
+  margin: 0;
+  width: 100%;
+  height: auto;
+  min-height: auto;
+  padding: 0;
+  overflow: visible;
+}
+
+.pdf-export-mode .a4-page::before,
+.pdf-export-mode .a4-page::after {
+  display: none !important;
+}
+
+.pdf-export-mode .title-section {
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 20px;
+}
+
+.pdf-export-mode .title-input {
+  border: none !important;
+  background: transparent !important;
+}
+
+.pdf-export-mode .column {
+  padding-top: 0 !important;
+  min-height: auto !important;
+  border: none !important;
+  background-color: transparent !important;
+}
+
+/* Keep column separator visible in PDF - very light grey */
+.pdf-export-mode .column::after {
+  background-color: #d8d8d8 !important;
+}
+
+/* 
+ * PDF Export Mode - Fix separator lines for RTL after DOM reversal
+ * During PDF export, RTL columns are reversed in DOM and flexDirection is set to 'row'
+ * So we need to use LTR-style separator positioning (line on the right of first column)
+ */
+
+/* Reset all RTL separator rules in pdf-export mode */
+.pdf-export-mode .columns-container.rtl .column::after {
+  display: none !important;
+}
+
+/* For RTL in PDF mode (after DOM reversal): line after first column (like LTR) */
+.pdf-export-mode .columns-container.rtl.columns-2 .column:first-child::after {
+  display: block !important;
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -28px;
+  left: auto !important;
+  width: 1px;
+  height: 100%;
+  background-color: #d8d8d8 !important;
+}
+
+.pdf-export-mode .columns-container.rtl.columns-3 .column:not(:last-child)::after {
+  display: block !important;
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -15px;
+  left: auto !important;
+  width: 1px;
+  height: 100%;
+  background-color: #d8d8d8 !important;
+}
+
+/* Ensure chords are not clipped during PDF export */
+.pdf-export-mode .chord-item {
+  overflow: visible !important;
+}
+
+.pdf-export-mode .chords-overlay {
+  overflow: visible !important;
+}
+
+.pdf-export-mode .lyrics-line {
+  overflow: visible !important;
+}
+
+.pdf-export-mode .lyrics-editor {
+  overflow: visible !important;
+}
+
+.pdf-export-mode .column {
+  overflow: visible !important;
+}
+
+/* Fix RTL column order for PDF export - we physically reorder columns in JS,
+   so just use normal row direction and hide any ::after that would be wrong */
+.pdf-export-mode .columns-container.rtl {
+  flex-direction: row !important; /* Override row-reverse since DOM is reordered */
+}
+
+/* Reset all RTL column separators - they use left positioning which is wrong after DOM reorder */
+.pdf-export-mode .columns-container.rtl .column::after {
+  left: auto !important;
+  right: -28px !important; /* Use right positioning like LTR */
+}
+
+.pdf-export-mode .columns-container.rtl.columns-3 .column::after {
+  right: -15px !important;
+}
+
+/* Hide separator on the last column (visually leftmost after reorder) */
+.pdf-export-mode .columns-container.rtl.columns-2 .column-left::after,
+.pdf-export-mode .columns-container.rtl.columns-3 .column-left::after {
+  display: none !important;
+}
+
+/* Show separator on right and middle columns */
+.pdf-export-mode .columns-container.rtl.columns-2 .column-right::after {
+  display: block !important;
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -28px;
+  left: auto;
+  width: 1px;
+  height: 100%;
+  background-color: #d8d8d8 !important;
+}
+
+.pdf-export-mode .columns-container.rtl.columns-3 .column-right::after,
+.pdf-export-mode .columns-container.rtl.columns-3 .column-middle::after {
+  display: block !important;
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -15px;
+  left: auto;
+  width: 1px;
+  height: 100%;
+  background-color: #d8d8d8 !important;
 }
 
 /* Editor Styles */
