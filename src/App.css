@@ -645,6 +645,169 @@
   }
 }
 
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .toolbar {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+  
+  .toolbar-row {
+    gap: 8px;
+    justify-content: center;
+  }
+  
+  .toolbar-row-branding {
+    padding-bottom: 4px;
+  }
+  
+  .toolbar-row-branding .help-button {
+    position: static;
+    transform: none;
+  }
+  
+  .app-title {
+    font-size: 16px;
+  }
+  
+  .app-author {
+    font-size: 9px;
+  }
+  
+  .toolbar-section {
+    gap: 4px;
+  }
+  
+  .toolbar-button {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  
+  .toolbar-divider {
+    display: none;
+  }
+  
+  .status-section {
+    position: static;
+    transform: none;
+    width: 100%;
+    justify-content: center;
+    margin-top: 4px;
+  }
+  
+  .app.rtl .status-section {
+    right: auto;
+    left: auto;
+  }
+  
+  .status-message {
+    font-size: 11px;
+  }
+  
+  /* Transpose section */
+  .transpose-section {
+    flex-wrap: nowrap;
+  }
+  
+  .transpose-section .transpose-label {
+    font-size: 11px;
+  }
+  
+  .transpose-section .transpose-value {
+    font-size: 12px;
+    min-width: 35px;
+  }
+  
+  /* File dialog on mobile */
+  .file-dialog {
+    width: 95%;
+    max-width: none;
+    max-height: 80vh;
+    margin: 10px;
+  }
+  
+  .file-dialog-header h2 {
+    font-size: 18px;
+  }
+  
+  .file-dialog-list {
+    max-height: 40vh;
+  }
+  
+  .file-dialog-item {
+    padding: 10px 12px;
+  }
+  
+  /* Confirm dialog on mobile */
+  .confirm-dialog {
+    width: 90%;
+    max-width: none;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar {
+    padding: 6px 8px;
+    gap: 4px;
+  }
+  
+  .toolbar-row {
+    gap: 4px;
+  }
+  
+  .toolbar-row-main,
+  .toolbar-row-secondary {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .app-branding {
+    flex-direction: row;
+    gap: 8px;
+  }
+  
+  .app-title {
+    font-size: 14px;
+  }
+  
+  .app-author {
+    font-size: 8px;
+  }
+  
+  .toolbar-button {
+    padding: 5px 6px;
+    font-size: 10px;
+  }
+  
+  /* Hide button text on very small screens, show icons only */
+  .toolbar-button.icon-only span {
+    display: none;
+  }
+  
+  .transpose-section .transpose-label {
+    font-size: 10px;
+  }
+  
+  .transpose-section button {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  .file-dialog {
+    padding: 12px;
+  }
+  
+  .file-dialog-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .file-dialog-actions button {
+    width: 100%;
+  }
+}
+
 /* Print Styles */
 @media print {
   /* Set page size and margins */

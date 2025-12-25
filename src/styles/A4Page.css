@@ -328,3 +328,135 @@
     break-inside: avoid;
   }
 }
+
+/* ========================================
+   Mobile Responsive Styles
+   ======================================== */
+
+/* Tablet and smaller laptops */
+@media screen and (max-width: 900px) {
+  .a4-page-container {
+    padding: 20px 10px;
+  }
+  
+  .a4-page {
+    width: 100%;
+    max-width: 794px;
+    min-height: auto;
+    height: auto;
+    padding: 60px 40px;
+  }
+  
+  .columns-container {
+    gap: 30px;
+  }
+  
+  .columns-container.columns-3 {
+    gap: 20px;
+  }
+}
+
+/* Mobile devices */
+@media screen and (max-width: 768px) {
+  .a4-page-container {
+    padding: 10px 5px;
+    background-color: #f5f5f5;
+  }
+  
+  .a4-page {
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    padding: 40px 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+  
+  /* Hide page boundary indicator on mobile */
+  .a4-page::before {
+    display: none;
+  }
+  
+  /* Stack columns vertically on mobile */
+  .columns-container {
+    flex-direction: column !important;
+    gap: 30px;
+  }
+  
+  .columns-container.columns-3 {
+    gap: 25px;
+  }
+  
+  /* RTL columns should also stack vertically */
+  .columns-container.rtl {
+    flex-direction: column !important;
+  }
+  
+  .column {
+    min-height: auto;
+    padding-top: 35px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 20px;
+  }
+  
+  .column:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  /* Hide vertical separator lines on mobile (columns are stacked) */
+  .column::after {
+    display: none !important;
+  }
+  
+  /* Title section */
+  .title-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+  }
+  
+  .title-input {
+    font-size: 20px;
+    padding: 6px;
+  }
+  
+  /* Lyrics text */
+  .lyrics-textarea {
+    font-size: 13px;
+    line-height: 2.0;
+    min-height: 200px;
+  }
+}
+
+/* Small mobile devices */
+@media screen and (max-width: 480px) {
+  .a4-page-container {
+    padding: 5px;
+  }
+  
+  .a4-page {
+    padding: 30px 15px;
+    border-radius: 0;
+  }
+  
+  .title-input {
+    font-size: 18px;
+    padding: 4px;
+  }
+  
+  .column {
+    padding-top: 30px;
+  }
+  
+  .lyrics-textarea {
+    font-size: 12px;
+    line-height: 1.9;
+    min-height: 150px;
+  }
+  
+  /* Overflow indicator smaller on mobile */
+  .overflow-indicator {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+}
