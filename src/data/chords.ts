@@ -147,18 +147,35 @@ export function getChordsByNaturalRoot(): Map<string, ChordDefinition[]> {
 }
 
 /**
+ * Create a searchable version of a chord symbol/name
+ * Converts special characters to ASCII equivalents for matching
+ */
+function makeSearchable(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/♯/g, '#')
+    .replace(/♭/g, 'b');
+}
+
+/**
  * Search chords by query string
+ * Supports both ASCII (#, b) and Unicode (♯, ♭) accidentals
  */
 export function searchChords(query: string): ChordDefinition[] {
   if (!query.trim()) {
     return CHORD_DATABASE;
   }
   
-  const normalizedQuery = query.toLowerCase().trim();
+  // Normalize the query to lowercase and convert to searchable ASCII format
+  const normalizedQuery = makeSearchable(query.trim());
   
   return CHORD_DATABASE.filter(chord => {
-    const symbolMatch = chord.symbol.toLowerCase().includes(normalizedQuery);
-    const nameMatch = chord.name.toLowerCase().includes(normalizedQuery);
+    // Make chord symbol and name searchable (convert ♯ to #, ♭ to b)
+    const searchableSymbol = makeSearchable(chord.symbol);
+    const searchableName = makeSearchable(chord.name);
+    
+    const symbolMatch = searchableSymbol.includes(normalizedQuery);
+    const nameMatch = searchableName.includes(normalizedQuery);
     return symbolMatch || nameMatch;
   });
 }
