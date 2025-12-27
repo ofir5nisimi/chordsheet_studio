@@ -221,70 +221,44 @@ function App() {
     setShowGrid((prev) => !prev);
   }, []);
 
-  // Helper function to scale chord positions when column width changes
-  const scaleChordPositions = (chords: PlacedChord[], scaleFactor: number): PlacedChord[] => {
-    return chords.map(chord => ({
-      ...chord,
-      offsetX: chord.offsetX * scaleFactor
-    }));
-  };
-
-  // Toggle column count with content redistribution and position scaling
+  // Toggle column count with content redistribution
+  // Note: offsetX is NOT scaled because it's a fine-tuning offset from character position,
+  // not an absolute position. Character positions remain valid across column width changes.
   const toggleColumnCount = useCallback(() => {
-    // Column width calculations based on CSS:
-    // Page content width: 794px - 76px*2 (margins) = 642px
-    // 2 columns: (642 - 57 gap) / 2 = 292.5px per column
-    // 3 columns: (642 - 30*2 gaps) / 3 = 194px per column
-    const COLUMN_WIDTH_2 = 292.5;
-    const COLUMN_WIDTH_3 = 194;
-    
     setColumnCount((prev) => {
       if (prev === 2) {
-        // Moving from 2 to 3 columns - columns get narrower
-        const scaleFactor = COLUMN_WIDTH_3 / COLUMN_WIDTH_2; // ~0.664
-        
-        // Scale chord positions in existing columns
-        setLeftColumnChords(prevChords => scaleChordPositions(prevChords, scaleFactor));
-        setRightColumnChords(prevChords => scaleChordPositions(prevChords, scaleFactor));
-        
+        // Moving from 2 to 3 columns
         // In RTL: right(1st) → left(2nd) becomes right(1st) → middle(2nd) → left(3rd)
         // Move the 2nd column content to middle
         if (direction === 'ltr') {
           // LTR: Move right column content to middle, clear right
           setMiddleColumnText(rightColumnText);
-          setMiddleColumnChords(scaleChordPositions(rightColumnChords, scaleFactor));
+          setMiddleColumnChords([...rightColumnChords]);
           setRightColumnText('');
           setRightColumnChords([]);
         } else {
           // RTL: Move left column content to middle, clear left
           setMiddleColumnText(leftColumnText);
-          setMiddleColumnChords(scaleChordPositions(leftColumnChords, scaleFactor));
+          setMiddleColumnChords([...leftColumnChords]);
           setLeftColumnText('');
           setLeftColumnChords([]);
         }
         return 3;
       } else {
-        // Moving from 3 to 2 columns - columns get wider
-        const scaleFactor = COLUMN_WIDTH_2 / COLUMN_WIDTH_3; // ~1.508
-        
-        // Scale chord positions in remaining columns
-        setLeftColumnChords(prevChords => scaleChordPositions(prevChords, scaleFactor));
-        setRightColumnChords(prevChords => scaleChordPositions(prevChords, scaleFactor));
-        
+        // Moving from 3 to 2 columns
         // Need to merge middle column content into the appropriate column
         if (direction === 'ltr') {
           if (middleColumnText.trim()) {
             // Append middle content to right column
             const newRightText = middleColumnText + (rightColumnText ? '\n' + rightColumnText : '');
             const middleLineCount = middleColumnText.split('\n').length;
-            const scaledMiddleChords = scaleChordPositions(middleColumnChords, scaleFactor);
+            // Shift right column chord line indices by the number of middle column lines
             const adjustedRightChords = rightColumnChords.map(chord => ({
               ...chord,
-              lineIndex: chord.lineIndex + middleLineCount,
-              offsetX: chord.offsetX * scaleFactor
+              lineIndex: chord.lineIndex + middleLineCount
             }));
             setRightColumnText(newRightText);
-            setRightColumnChords([...scaledMiddleChords, ...adjustedRightChords]);
+            setRightColumnChords([...middleColumnChords, ...adjustedRightChords]);
           }
           setMiddleColumnText('');
           setMiddleColumnChords([]);
@@ -293,14 +267,12 @@ function App() {
           if (middleColumnText.trim()) {
             const newLeftText = middleColumnText + (leftColumnText ? '\n' + leftColumnText : '');
             const middleLineCount = middleColumnText.split('\n').length;
-            const scaledMiddleChords = scaleChordPositions(middleColumnChords, scaleFactor);
             const adjustedLeftChords = leftColumnChords.map(chord => ({
               ...chord,
-              lineIndex: chord.lineIndex + middleLineCount,
-              offsetX: chord.offsetX * scaleFactor
+              lineIndex: chord.lineIndex + middleLineCount
             }));
             setLeftColumnText(newLeftText);
-            setLeftColumnChords([...scaledMiddleChords, ...adjustedLeftChords]);
+            setLeftColumnChords([...middleColumnChords, ...adjustedLeftChords]);
           }
           setMiddleColumnText('');
           setMiddleColumnChords([]);
