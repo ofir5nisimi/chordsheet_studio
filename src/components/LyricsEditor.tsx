@@ -95,6 +95,77 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
     onTextChange(newLines.join('\n'));
   }, [lines, onTextChange]);
 
+  // Handle paste with multi-line text
+  const handleLinePaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>, lineIndex: number) => {
+    const pastedText = e.clipboardData.getData('text');
+    
+    // Check if pasted text contains newlines
+    if (pastedText.includes('\n') || pastedText.includes('\r')) {
+      e.preventDefault();
+      
+      // Split by various newline formats and filter empty lines at the end
+      const pastedLines = pastedText.split(/\r\n|\r|\n/);
+      
+      // Get current input element and cursor position
+      const input = e.currentTarget;
+      const cursorPos = input.selectionStart || 0;
+      const currentLine = lines[lineIndex] || '';
+      
+      // Split current line at cursor position
+      const beforeCursor = currentLine.slice(0, cursorPos);
+      const afterCursor = currentLine.slice(input.selectionEnd || cursorPos);
+      
+      // Build new lines array
+      const newLines = [...lines];
+      
+      // First pasted line goes with text before cursor
+      const firstLine = beforeCursor + pastedLines[0];
+      
+      // Last pasted line goes with text after cursor
+      const lastLine = pastedLines[pastedLines.length - 1] + afterCursor;
+      
+      // Middle lines (if any) are inserted as-is
+      const middleLines = pastedLines.slice(1, -1);
+      
+      // Replace current line and insert new lines
+      if (pastedLines.length === 1) {
+        // Single line paste (shouldn't reach here, but just in case)
+        newLines[lineIndex] = firstLine + afterCursor;
+      } else {
+        // Multi-line paste
+        newLines.splice(lineIndex, 1, firstLine, ...middleLines, lastLine);
+      }
+      
+      // Update text
+      onTextChange(newLines.join('\n'));
+      
+      // Shift chords on lines after the current line
+      const numNewLines = pastedLines.length - 1;
+      if (numNewLines > 0) {
+        const updatedChords = chords.map(chord => 
+          chord.lineIndex > lineIndex
+            ? { ...chord, lineIndex: chord.lineIndex + numNewLines }
+            : chord
+        );
+        onChordsChange(updatedChords);
+      }
+      
+      // Focus the last inserted line
+      const lastInsertedLineIndex = lineIndex + pastedLines.length - 1;
+      setTimeout(() => {
+        setEditingLineIndex(lastInsertedLineIndex);
+        const inputEl = inputRefs.current.get(lastInsertedLineIndex);
+        if (inputEl) {
+          inputEl.focus();
+          // Set cursor at the position after the last pasted content (before afterCursor)
+          const cursorPosition = lastLine.length - afterCursor.length;
+          inputEl.setSelectionRange(cursorPosition, cursorPosition);
+        }
+      }, 0);
+    }
+    // If no newlines, let the default paste behavior handle it
+  }, [lines, chords, onTextChange, onChordsChange]);
+
   // Handle key down in line input
   const handleLineKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>, lineIndex: number) => {
     if (e.key === 'Enter') {
@@ -707,6 +778,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
               value={line}
               onChange={(e) => handleLineChange(lineIndex, e.target.value)}
               onKeyDown={(e) => handleLineKeyDown(e, lineIndex)}
+              onPaste={(e) => handleLinePaste(e, lineIndex)}
               onBlur={() => setEditingLineIndex(null)}
               autoFocus
             />
@@ -751,7 +823,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
         </div>
       </div>
     );
-  }, [editingLineIndex, chordMode, direction, renderLineChords, handleLineChange, handleLineKeyDown, handleCharClick, getChordsForLine, lineHoverIndex, copiedSection, handleCopySection, handlePasteSection]);
+  }, [editingLineIndex, chordMode, direction, renderLineChords, handleLineChange, handleLineKeyDown, handleLinePaste, handleCharClick, getChordsForLine, lineHoverIndex, copiedSection, handleCopySection, handlePasteSection]);
 
   // Handle adding new line at end
   const handleAddLine = useCallback(() => {
