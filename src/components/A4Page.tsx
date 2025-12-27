@@ -32,6 +32,7 @@ interface A4PageProps {
   columnCount?: 2 | 3;
   showColumnSeparators?: boolean;
   transposeSemitones?: number;
+  fontSize?: number;
 }
 
 /**
@@ -69,6 +70,7 @@ const A4Page: React.FC<A4PageProps> = ({
   columnCount = 2,
   showColumnSeparators = true,
   transposeSemitones = 0,
+  fontSize = 14,
 }) => {
   const leftEditorRef = useRef<HTMLDivElement>(null);
   const middleEditorRef = useRef<HTMLDivElement>(null);
@@ -163,6 +165,7 @@ const A4Page: React.FC<A4PageProps> = ({
                 lineIndicators={leftColumnIndicators}
                 onLineIndicatorsChange={onLeftColumnIndicatorsChange}
                 transposeSemitones={transposeSemitones}
+                fontSize={fontSize}
                 placeholder={`Click to add lyrics in ${getColumnLabel('left')} column...`}
                 copiedSection={copiedSection}
                 onCopiedSectionChange={setCopiedSection}
@@ -189,6 +192,7 @@ const A4Page: React.FC<A4PageProps> = ({
                   lineIndicators={middleColumnIndicators}
                   onLineIndicatorsChange={onMiddleColumnIndicatorsChange}
                   transposeSemitones={transposeSemitones}
+                  fontSize={fontSize}
                   placeholder={`Click to add lyrics in ${getColumnLabel('middle')} column...`}
                   copiedSection={copiedSection}
                   onCopiedSectionChange={setCopiedSection}
@@ -215,6 +219,7 @@ const A4Page: React.FC<A4PageProps> = ({
                 lineIndicators={rightColumnIndicators}
                 onLineIndicatorsChange={onRightColumnIndicatorsChange}
                 transposeSemitones={transposeSemitones}
+                fontSize={fontSize}
                 placeholder={`Click to add lyrics in ${getColumnLabel('right')} column...`}
                 copiedSection={copiedSection}
                 onCopiedSectionChange={setCopiedSection}

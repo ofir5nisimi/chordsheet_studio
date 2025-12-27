@@ -29,6 +29,7 @@ interface LyricsEditorProps {
   lineIndicators?: Set<number>;
   onLineIndicatorsChange?: (indicators: Set<number>) => void;
   transposeSemitones?: number;
+  fontSize?: number;
   placeholder?: string;
   copiedSection?: { lines: string[]; chords: PlacedChord[] } | null;
   onCopiedSectionChange?: (section: { lines: string[]; chords: PlacedChord[] } | null) => void;
@@ -52,6 +53,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   lineIndicators = new Set(),
   onLineIndicatorsChange,
   transposeSemitones = 0,
+  fontSize = 14,
   placeholder = 'Type your lyrics here...',
   copiedSection = null,
   onCopiedSectionChange,
@@ -74,6 +76,9 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   
   const editorRef = useRef<HTMLDivElement>(null);
   const inputRefs = useRef<Map<number, HTMLInputElement>>(new Map());
+
+  // Calculate character width based on font size (ratio: 8.4px at 14px font = 0.6)
+  const charWidth = useMemo(() => fontSize * 0.6, [fontSize]);
 
   // Split text into lines
   const lines = useMemo(() => text.split('\n'), [text]);
@@ -246,13 +251,12 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
     // Calculate approximate character position based on click X position
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    const charWidth = 8.4;
     const charIndex = Math.max(0, Math.floor(clickX / charWidth));
 
     setDropdownPosition({ x: e.clientX, y: e.clientY });
     setPendingChordPosition({ lineIndex, charIndex });
     setSelectedChordId(null);
-  }, [chordMode]);
+  }, [chordMode, charWidth]);
 
   // Handle chord selection from dropdown
   const handleSelectChord = useCallback((chord: ChordDefinition) => {
@@ -329,7 +333,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
       const chord = chords.find(c => c.id === draggingChordId);
       if (chord && editorRef.current) {
         const columnWidth = editorRef.current.offsetWidth;
-        const charPosition = chord.charIndex * 8.4; // charWidth
+        const charPosition = chord.charIndex * charWidth;
         const padding = 5; // Extra space on both sides for positioning flexibility
         const minOffset = -charPosition - padding; // Allow some space past the left edge
         const maxOffset = columnWidth - charPosition + padding; // Allow some space past the right edge
@@ -375,7 +379,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
         const chord = chords.find(c => c.id === draggingChordId);
         if (chord && editorRef.current) {
           const columnWidth = editorRef.current.offsetWidth;
-          const charPosition = chord.charIndex * 8.4;
+          const charPosition = chord.charIndex * charWidth;
           const padding = 5;
           const minOffset = -charPosition - padding;
           const maxOffset = columnWidth - charPosition + padding;
@@ -411,7 +415,7 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
       document.removeEventListener('touchend', handleTouchEnd);
       document.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [draggingChordId, dragStartX, dragStartOffset, chords, onChordsChange, direction]);
+  }, [draggingChordId, dragStartX, dragStartOffset, chords, onChordsChange, direction, charWidth]);
 
   // Handle right-click context menu
   const handleChordContextMenu = useCallback((e: React.MouseEvent, chordId: string) => {
@@ -506,10 +510,9 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   };
 
   // Calculate character position for chord placement
-  const getCharacterPosition = useCallback((charIndex: number): number => {
-    const charWidth = 8.4; // Approximate width of a character at 14px font
-    return charIndex * charWidth;
-  }, []);
+  const getCharacterPosition = useCallback((charIdx: number): number => {
+    return charIdx * charWidth;
+  }, [charWidth]);
 
   // Render grid lines
   const renderGrid = useMemo(() => {
@@ -862,7 +865,11 @@ const LyricsEditor: React.FC<LyricsEditorProps> = ({
   }, [lineHoverIndex, copiedChords, editingLineIndex, handleCopyChords, handlePasteChords]);
 
   return (
-    <div ref={editorRef} className="lyrics-editor">
+    <div 
+      ref={editorRef} 
+      className="lyrics-editor"
+      style={{ '--lyrics-font-size': `${fontSize}px` } as React.CSSProperties}
+    >
       {/* Editor Controls */}
       <div className="editor-controls">
         <button

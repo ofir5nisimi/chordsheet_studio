@@ -51,6 +51,7 @@ function App() {
   const [columnCount, setColumnCount] = useState<2 | 3>(2);
   const [showColumnSeparators, setShowColumnSeparators] = useState(true);
   const [transposeSemitones, setTransposeSemitones] = useState<number>(0);
+  const [fontSize, setFontSize] = useState<number>(14); // Default font size in pixels
 
   // Undo/Redo history
   const [history, setHistory] = useState<HistoryState[]>([]);
@@ -101,6 +102,7 @@ function App() {
           direction,
           showGrid,
           columnCount,
+          fontSize,
         });
         showStatusMessage('Auto-saved');
       }
@@ -112,7 +114,7 @@ function App() {
         clearInterval(autoSaveTimerRef.current);
       }
     };
-  }, [hasUnsavedChanges, title, leftColumnText, middleColumnText, rightColumnText, leftColumnChords, middleColumnChords, rightColumnChords, direction, showGrid, columnCount]);
+  }, [hasUnsavedChanges, title, leftColumnText, middleColumnText, rightColumnText, leftColumnChords, middleColumnChords, rightColumnChords, direction, showGrid, columnCount, fontSize]);
 
   // Show status message temporarily
   const showStatusMessage = useCallback((message: string) => {
@@ -344,6 +346,7 @@ function App() {
       direction,
       showGrid,
       columnCount,
+      fontSize,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       version: 1,
@@ -362,7 +365,7 @@ function App() {
     }
     
     setShowSaveDialog(false);
-  }, [currentDocId, title, leftColumnText, middleColumnText, rightColumnText, leftColumnChords, middleColumnChords, rightColumnChords, direction, showGrid, columnCount, showStatusMessage]);
+  }, [currentDocId, title, leftColumnText, middleColumnText, rightColumnText, leftColumnChords, middleColumnChords, rightColumnChords, direction, showGrid, columnCount, fontSize, showStatusMessage]);
 
   // Load document
   const handleLoadDocument = useCallback((doc: ChordSheetDocument) => {
@@ -376,6 +379,7 @@ function App() {
     setDirection(doc.direction);
     setShowGrid(doc.showGrid);
     setColumnCount(doc.columnCount);
+    setFontSize(doc.fontSize ?? 14);
     setCurrentDocId(doc.id);
     setCurrentFileName(doc.name);
     setHasUnsavedChanges(false);
@@ -577,6 +581,7 @@ function App() {
       setDirection(doc.direction || 'ltr');
       setShowGrid(doc.showGrid || false);
       setColumnCount(doc.columnCount || 2);
+      setFontSize(doc.fontSize ?? 14);
       // Generate new ID for imported document (don't overwrite existing)
       setCurrentDocId(null);
       setCurrentFileName(doc.name || 'Imported Song');
@@ -793,6 +798,39 @@ function App() {
           </button>
         </div>
 
+        {/* Font Size Controls - force LTR to prevent RTL reversal */}
+        <div className="toolbar-section font-size-section" dir="ltr">
+          <span className="font-size-label">Font:</span>
+          <button
+            className="toolbar-button font-size-btn"
+            onClick={() => setFontSize(prev => Math.max(10, prev - 1))}
+            disabled={fontSize <= 10}
+            title="Decrease font size"
+          >
+            A−
+          </button>
+          <span className={`font-size-value ${fontSize !== 14 ? 'active' : ''}`}>
+            {fontSize}px
+          </span>
+          <button
+            className="toolbar-button font-size-btn"
+            onClick={() => setFontSize(prev => Math.min(20, prev + 1))}
+            disabled={fontSize >= 20}
+            title="Increase font size"
+          >
+            A+
+          </button>
+          {fontSize !== 14 && (
+            <button
+              className="toolbar-button font-size-reset"
+              onClick={() => setFontSize(14)}
+              title="Reset to default font size (14px)"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+
         {/* Transpose Controls - force LTR to prevent RTL reversal */}
         <div className="toolbar-section transpose-section" dir="ltr">
           <span className="transpose-label">Transpose:</span>
@@ -869,6 +907,7 @@ function App() {
           columnCount={columnCount}
           showColumnSeparators={showColumnSeparators}
           transposeSemitones={transposeSemitones}
+          fontSize={fontSize}
         />
       </main>
 

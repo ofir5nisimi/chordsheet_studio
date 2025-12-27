@@ -19,6 +19,7 @@ export interface ChordSheetDocument {
   direction: TextDirection;
   showGrid: boolean;
   columnCount: 2 | 3;
+  fontSize?: number;
   createdAt: string;
   updatedAt: string;
   version: number;

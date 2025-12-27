@@ -68,7 +68,7 @@
   width: 100%;
   min-height: 400px;
   font-family: 'Arial', sans-serif;
-  font-size: 14px;
+  font-size: var(--lyrics-font-size, 14px);
 }
 
 .lyrics-lines-container.rtl {
@@ -207,7 +207,7 @@
   top: 0;
   font-weight: 600;
   color: #1565c0;
-  font-size: 13px;
+  font-size: calc(var(--lyrics-font-size, 14px) * 0.93);
   cursor: grab;
   user-select: none;
   padding: 1px 3px;
@@ -355,7 +355,7 @@
   border: none;
   outline: none;
   font-family: 'Arial', sans-serif;
-  font-size: 14px;
+  font-size: var(--lyrics-font-size, 14px);
   line-height: 1.6;
   padding: 2px 4px;
   background-color: rgba(52, 152, 219, 0.08);
