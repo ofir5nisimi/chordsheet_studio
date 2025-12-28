@@ -57,6 +57,7 @@ function generateChordsForRoot(root: string): ChordDefinition[] {
   chords.push({ symbol: `${root}sus2`, name: `${root} Suspended 2nd`, root, category: 'suspended' });
   chords.push({ symbol: `${root}sus4`, name: `${root} Suspended 4th`, root, category: 'suspended' });
   chords.push({ symbol: `${root}7sus4`, name: `${root} 7th Suspended 4th`, root, category: 'suspended' });
+  chords.push({ symbol: `${root}4→3`, name: `${root} Sus4 to Major`, root, category: 'suspended' });
   
   // Add chords
   chords.push({ symbol: `${root}add9`, name: `${root} Add 9th`, root, category: 'add' });
