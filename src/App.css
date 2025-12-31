@@ -5,68 +5,28 @@
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background-color: #f5f5f5;
 }
 
-/* RTL Mode - App level */
-.app.rtl {
-  direction: rtl;
-}
+/* ========================================
+   HEADER STYLES
+   ======================================== */
 
-/* Toolbar Styles */
-.toolbar {
+.app-header {
   display: flex;
-  flex-direction: column;
-  padding: 8px 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
   background-color: #2c3e50;
   color: #ffffff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 100;
-  gap: 8px;
+  flex-shrink: 0;
 }
 
-/* Toolbar Rows */
-.toolbar-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  position: relative;
-}
-
-.toolbar-row-branding {
-  justify-content: center;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
-}
-
-.toolbar-row-branding .help-button {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.toolbar-row-main {
-  justify-content: center;
-}
-
-.toolbar-row-secondary {
-  justify-content: center;
-  padding-top: 4px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* RTL Mode - Toolbar rows mirror */
-.app.rtl .toolbar-row {
-  flex-direction: row-reverse;
-}
-
-/* App Branding */
 .app-branding {
   display: flex;
   flex-direction: column;
@@ -75,7 +35,7 @@
 }
 
 .app-title {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   margin: 0;
   font-family: 'Arial', sans-serif;
@@ -84,179 +44,243 @@
 }
 
 .app-author {
-  font-size: 12px;
+  font-size: 13px;
   color: rgba(255, 255, 255, 0.7);
   font-style: italic;
   white-space: nowrap;
 }
 
-/* Toolbar Sections */
-.toolbar-section {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-/* RTL Mode - Sections mirror (except transpose and font-size which are forced LTR) */
-.app.rtl .toolbar-section:not(.transpose-section):not(.font-size-section) {
-  flex-direction: row-reverse;
-}
-
-.file-actions {
-  /* No border needed - centered layout */
-}
-
-.app.rtl .file-actions {
-  /* No border needed - centered layout */
-}
-
-.view-actions {
-  /* No border needed - centered layout */
-}
-
-.app.rtl .view-actions {
-  /* No border needed - centered layout */
-}
-
-.status-section {
+.app-header .help-button {
   position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  gap: 8px;
-}
-
-/* RTL: status section on the left */
-.app.rtl .status-section {
-  right: auto;
   left: 16px;
-}
-
-/* Toolbar Divider */
-.toolbar-divider {
-  color: rgba(255, 255, 255, 0.3);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background-color: #9b59b6;
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
   font-size: 18px;
-  user-select: none;
-  padding: 0 4px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Toolbar Buttons */
-.toolbar-button {
-  padding: 8px 16px;
+.app-header .help-button:hover {
+  background-color: #8e44ad;
+}
+
+/* ========================================
+   MAIN LAYOUT WITH SIDEBARS
+   ======================================== */
+
+.main-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ========================================
+   SIDEBAR STYLES
+   ======================================== */
+
+.sidebar {
+  width: 150px;
+  background-color: #34495e;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 10px;
+  gap: 12px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.sidebar-left {
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-right {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 4px;
+  margin-bottom: 2px;
+}
+
+.sidebar-button {
+  padding: 8px 10px;
+  background-color: #3498db;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: left;
+  white-space: nowrap;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.sidebar-button:hover {
+  background-color: #2980b9;
+}
+
+.sidebar-button.active {
+  background-color: #27ae60;
+}
+
+.sidebar-button.active:hover {
+  background-color: #229954;
+}
+
+.sidebar-button.disabled,
+.sidebar-button:disabled {
+  background-color: #5a6c7d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Control row for +/- buttons */
+.sidebar-control-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: space-between;
+}
+
+.sidebar-btn-small {
+  width: 32px;
+  height: 28px;
+  padding: 0;
   background-color: #3498db;
   color: #ffffff;
   border: none;
   border-radius: 4px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  direction: ltr; /* Force LTR for button content - prevents text/emoji flipping in RTL mode */
-  unicode-bidi: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.toolbar-button:hover {
+.sidebar-btn-small:hover {
   background-color: #2980b9;
 }
 
-.toolbar-button:focus {
-  outline: 2px solid #ffffff;
-  outline-offset: 2px;
-}
-
-.toolbar-button:active {
-  transform: scale(0.98);
-}
-
-.toolbar-button.active {
-  background-color: #27ae60;
-}
-
-.toolbar-button.active:hover {
-  background-color: #229954;
-}
-
-.toolbar-button.disabled,
-.toolbar-button:disabled {
-  background-color: #7f8c8d;
+.sidebar-btn-small:disabled {
+  background-color: #5a6c7d;
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
-.toolbar-button.disabled:hover,
-.toolbar-button:disabled:hover {
-  background-color: #7f8c8d;
-  transform: none;
-}
-
-.direction-toggle {
-  min-width: 120px;
+.sidebar-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  min-width: 36px;
   text-align: center;
 }
 
-/* RTL Indicator Badge */
-.rtl-indicator {
-  background-color: #9b59b6;
+.sidebar-value.active {
+  color: #2ecc71;
+  background-color: rgba(46, 204, 113, 0.2);
+}
+
+.sidebar-btn-reset {
+  padding: 4px 8px;
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.sidebar-btn-reset:hover {
+  background-color: rgba(255, 255, 255, 0.1);
   color: #ffffff;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
-  font-family: 'Arial', sans-serif;
-  direction: rtl;
-  animation: rtlPulse 2s ease-in-out infinite;
 }
 
-@keyframes rtlPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+/* Status section - stays after transpose, not pushed to bottom */
+.sidebar-status {
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Current File Name */
-.current-file {
-  font-size: 13px;
+.sidebar-status .current-file {
+  font-size: 11px;
   color: rgba(255, 255, 255, 0.8);
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-all;
+  display: block;
+  margin-bottom: 4px;
 }
 
-/* Save Status */
-.save-status {
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 10px;
+.sidebar-status .save-status {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  display: inline-block;
 }
 
-.save-status.saved {
+.sidebar-status .save-status.saved {
   background-color: rgba(39, 174, 96, 0.3);
   color: #2ecc71;
 }
 
-.save-status.unsaved {
+.sidebar-status .save-status.unsaved {
   background-color: rgba(241, 196, 15, 0.3);
   color: #f1c40f;
 }
 
-.save-status.saving {
+.sidebar-status .save-status.saving {
   background-color: rgba(52, 152, 219, 0.3);
   color: #3498db;
 }
 
-/* Status Message */
-.status-message {
-  font-size: 12px;
+.sidebar-status .status-message {
+  font-size: 10px;
   color: #2ecc71;
-  animation: fadeIn 0.3s ease;
+  display: block;
+  margin-top: 4px;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* ========================================
+   EDITOR STYLES
+   ======================================== */
+
+.editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/* Confirmation Dialogs */
+/* ========================================
+   DIALOGS
+   ======================================== */
+
 .confirm-overlay {
   position: fixed;
   top: 0;
@@ -371,7 +395,8 @@
 .pdf-export-mode .new-page-indicator,
 .pdf-export-mode .add-column-btn,
 .pdf-export-mode .page-controls,
-.pdf-export-mode .toolbar,
+.pdf-export-mode .app-header,
+.pdf-export-mode .sidebar,
 .pdf-export-mode .confirm-overlay,
 .pdf-export-mode .add-line-area {
   display: none !important;
@@ -422,40 +447,9 @@
 }
 
 /* 
- * PDF Export Mode - Fix separator lines for RTL after DOM reversal
- * During PDF export, RTL columns are reversed in DOM and flexDirection is set to 'row'
- * So we need to use LTR-style separator positioning (line on the right of first column)
+ * PDF Export Mode - Column separators
+ * Since RTL no longer reverses column order, separator logic is the same for both directions
  */
-
-/* Reset all RTL separator rules in pdf-export mode */
-.pdf-export-mode .columns-container.rtl .column::after {
-  display: none !important;
-}
-
-/* For RTL in PDF mode (after DOM reversal): line after first column (like LTR) */
-.pdf-export-mode .columns-container.rtl.columns-2 .column:first-child::after {
-  display: block !important;
-  content: '';
-  position: absolute;
-  top: 0;
-  right: -28px;
-  left: auto !important;
-  width: 1px;
-  height: 100%;
-  background-color: #d8d8d8 !important;
-}
-
-.pdf-export-mode .columns-container.rtl.columns-3 .column:not(:last-child)::after {
-  display: block !important;
-  content: '';
-  position: absolute;
-  top: 0;
-  right: -15px;
-  left: auto !important;
-  width: 1px;
-  height: 100%;
-  background-color: #d8d8d8 !important;
-}
 
 /* Ensure chords are not clipped during PDF export */
 .pdf-export-mode .chord-item {
@@ -478,274 +472,53 @@
   overflow: visible !important;
 }
 
-/* Fix RTL column order for PDF export - we physically reorder columns in JS,
-   so just use normal row direction and hide any ::after that would be wrong */
-.pdf-export-mode .columns-container.rtl {
-  flex-direction: row !important; /* Override row-reverse since DOM is reordered */
-}
+/* ========================================
+   RESPONSIVE STYLES
+   ======================================== */
 
-/* Reset all RTL column separators - they use left positioning which is wrong after DOM reorder */
-.pdf-export-mode .columns-container.rtl .column::after {
-  left: auto !important;
-  right: -28px !important; /* Use right positioning like LTR */
-}
-
-.pdf-export-mode .columns-container.rtl.columns-3 .column::after {
-  right: -15px !important;
-}
-
-/* Hide separator on the last column (visually leftmost after reorder) */
-.pdf-export-mode .columns-container.rtl.columns-2 .column-left::after,
-.pdf-export-mode .columns-container.rtl.columns-3 .column-left::after {
-  display: none !important;
-}
-
-/* Show separator on right and middle columns */
-.pdf-export-mode .columns-container.rtl.columns-2 .column-right::after {
-  display: block !important;
-  content: '';
-  position: absolute;
-  top: 0;
-  right: -28px;
-  left: auto;
-  width: 1px;
-  height: 100%;
-  background-color: #d8d8d8 !important;
-}
-
-.pdf-export-mode .columns-container.rtl.columns-3 .column-right::after,
-.pdf-export-mode .columns-container.rtl.columns-3 .column-middle::after {
-  display: block !important;
-  content: '';
-  position: absolute;
-  top: 0;
-  right: -15px;
-  left: auto;
-  width: 1px;
-  height: 100%;
-  background-color: #d8d8d8 !important;
-}
-
-/* Editor Styles */
-.editor {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Transpose Section Styles */
-.transpose-section {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.transpose-label {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
-}
-
-.transpose-btn {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background-color: #3498db;
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.transpose-btn:hover {
-  background-color: #2980b9;
-}
-
-.transpose-btn:active {
-  transform: scale(0.95);
-}
-
-.transpose-btn:disabled {
-  background-color: #7f8c8d;
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.transpose-btn:disabled:hover {
-  background-color: #7f8c8d;
-  transform: none;
-}
-
-.transpose-value {
-  min-width: 32px;
-  text-align: center;
-  font-size: 14px;
-  font-weight: 600;
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.transpose-value.positive {
-  color: #2ecc71;
-}
-
-.transpose-value.negative {
-  color: #e74c3c;
-}
-
-.transpose-reset {
-  padding: 4px 10px;
-  background-color: transparent;
-  color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-left: 4px;
-}
-
-.transpose-reset:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-/* Font Size Section Styles */
-.font-size-section {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.font-size-label {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
-}
-
-.font-size-btn {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background-color: #9b59b6;
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.font-size-btn:hover {
-  background-color: #8e44ad;
-}
-
-.font-size-btn:active {
-  transform: scale(0.95);
-}
-
-.font-size-btn:disabled {
-  background-color: #7f8c8d;
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.font-size-btn:disabled:hover {
-  background-color: #7f8c8d;
-  transform: none;
-}
-
-.font-size-value {
-  min-width: 40px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.font-size-value.active {
-  color: #bb8fce;
-}
-
-.font-size-reset {
-  padding: 4px 10px;
-  background-color: transparent;
-  color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-left: 4px;
-}
-
-.font-size-reset:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-/* Responsive: Shrink elements on smaller screens */
-@media (max-width: 1200px) {
-  .app-title {
-    font-size: 20px;
+@media (max-width: 1100px) {
+  .sidebar {
+    width: 130px;
+    padding: 10px 8px;
+    gap: 10px;
   }
   
-  .app-author {
+  .sidebar-button {
+    padding: 6px 8px;
     font-size: 11px;
+  }
+  
+  .app-title {
+    font-size: 18px;
   }
 }
 
 @media (max-width: 900px) {
-  .app-title {
-    font-size: 18px;
+  .sidebar {
+    width: 115px;
+    padding: 8px 6px;
+    gap: 8px;
   }
   
-  .app-author {
+  .sidebar-button {
+    padding: 5px 6px;
     font-size: 10px;
   }
   
-  .toolbar-button {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-}
-
-/* Mobile Responsive Styles */
-@media (max-width: 768px) {
-  .toolbar {
-    padding: 8px 12px;
-    gap: 6px;
+  .sidebar-label {
+    font-size: 9px;
   }
   
-  .toolbar-row {
-    gap: 8px;
-    justify-content: center;
+  .sidebar-btn-small {
+    width: 26px;
+    height: 24px;
+    font-size: 11px;
   }
   
-  .toolbar-row-branding {
-    padding-bottom: 4px;
-  }
-  
-  .toolbar-row-branding .help-button {
-    position: static;
-    transform: none;
+  .sidebar-value {
+    font-size: 10px;
+    padding: 3px 4px;
+    min-width: 28px;
   }
   
   .app-title {
@@ -755,98 +528,36 @@
   .app-author {
     font-size: 9px;
   }
-  
-  .toolbar-section {
-    gap: 4px;
-  }
-  
-  .toolbar-button {
-    padding: 6px 8px;
-    font-size: 11px;
-  }
-  
-  .toolbar-divider {
-    display: none;
-  }
-  
-  .status-section {
-    position: static;
-    transform: none;
-    width: 100%;
-    justify-content: center;
-    margin-top: 4px;
-  }
-  
-  .app.rtl .status-section {
-    right: auto;
-    left: auto;
-  }
-  
-  .status-message {
-    font-size: 11px;
-  }
-  
-  /* Transpose section */
-  .transpose-section {
-    flex-wrap: nowrap;
-  }
-  
-  .transpose-section .transpose-label {
-    font-size: 11px;
-  }
-  
-  .transpose-section .transpose-value {
-    font-size: 12px;
-    min-width: 35px;
-  }
-  
-  /* File dialog on mobile */
-  .file-dialog {
-    width: 95%;
-    max-width: none;
-    max-height: 80vh;
-    margin: 10px;
-  }
-  
-  .file-dialog-header h2 {
-    font-size: 18px;
-  }
-  
-  .file-dialog-list {
-    max-height: 40vh;
-  }
-  
-  .file-dialog-item {
-    padding: 10px 12px;
-  }
-  
-  /* Confirm dialog on mobile */
-  .confirm-dialog {
-    width: 90%;
-    max-width: none;
-    padding: 20px;
-  }
 }
 
-@media (max-width: 480px) {
-  .toolbar {
-    padding: 6px 8px;
-    gap: 4px;
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100px;
+    padding: 6px 5px;
+    gap: 6px;
   }
   
-  .toolbar-row {
-    gap: 4px;
+  .sidebar-section {
+    gap: 2px;
   }
   
-  .toolbar-row-main,
-  .toolbar-row-secondary {
-    flex-wrap: wrap;
-    gap: 4px;
+  .sidebar-button {
+    padding: 4px 5px;
+    font-size: 9px;
   }
   
-  .app-branding {
-    flex-direction: row;
-    gap: 8px;
+  .sidebar-label {
+    font-size: 8px;
+  }
+  
+  .sidebar-btn-small {
+    width: 24px;
+    height: 22px;
+    font-size: 10px;
+  }
+  
+  .app-header {
+    padding: 6px 12px;
   }
   
   .app-title {
@@ -857,58 +568,29 @@
     font-size: 8px;
   }
   
-  .toolbar-button {
-    padding: 5px 6px;
-    font-size: 10px;
-  }
-  
-  /* Hide button text on very small screens, show icons only */
-  .toolbar-button.icon-only span {
-    display: none;
-  }
-  
-  .transpose-section .transpose-label {
-    font-size: 10px;
-  }
-  
-  .transpose-section button {
-    padding: 4px 8px;
-    font-size: 12px;
-  }
-  
-  .font-size-section .font-size-label {
-    font-size: 10px;
-  }
-  
-  .font-size-section button {
-    padding: 4px 8px;
-    font-size: 10px;
-  }
-  
-  .file-dialog {
-    padding: 12px;
-  }
-  
-  .file-dialog-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .file-dialog-actions button {
-    width: 100%;
+  .mode-toggle-button {
+    font-size: 9px;
+    padding: 5px 4px;
   }
 }
 
-/* Print Styles */
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
 @media print {
-  /* Set page size and margins */
   @page {
     size: A4;
     margin: 0;
   }
 
-  .toolbar {
+  .app-header,
+  .sidebar {
     display: none !important;
+  }
+
+  .main-layout {
+    display: block;
   }
 
   .app {
@@ -919,7 +601,6 @@
     padding: 0;
   }
 
-  /* Hide all dialogs and overlays */
   .confirm-overlay,
   .file-dialog-overlay {
     display: none !important;

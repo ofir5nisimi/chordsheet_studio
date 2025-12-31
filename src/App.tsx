@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { A4Page, FileDialog, HelpGuide } from './components';
+import { A4Page, FileDialog, HelpGuide, ModeToggle, BarChartEditor } from './components';
 import type { PlacedChord } from './components';
-import type { TextDirection } from './types';
+import type { TextDirection, AppMode, BarChartDocument } from './types';
+import { createDefaultBarChartDocument } from './types';
 import {
   saveDocument,
   autoSave,
@@ -34,7 +35,30 @@ interface HistoryState {
 
 const MAX_HISTORY_SIZE = 50;
 
+// Storage key for mode preference
+const MODE_STORAGE_KEY = 'guitar-chords-mode';
+const BARCHART_STORAGE_KEY = 'guitar-chords-barchart';
+
 function App() {
+  // Application mode state
+  const [mode, setMode] = useState<AppMode>(() => {
+    const savedMode = localStorage.getItem(MODE_STORAGE_KEY);
+    return (savedMode === 'lyrics' || savedMode === 'barChart') ? savedMode : 'lyrics';
+  });
+
+  // Bar Chart document state
+  const [barChartDocument, setBarChartDocument] = useState<BarChartDocument>(() => {
+    try {
+      const saved = localStorage.getItem(BARCHART_STORAGE_KEY);
+      if (saved) {
+        return JSON.parse(saved) as BarChartDocument;
+      }
+    } catch (e) {
+      console.error('Failed to load bar chart document:', e);
+    }
+    return createDefaultBarChartDocument();
+  });
+
   // Document state
   const [title, setTitle] = useState('');
   const [leftColumnText, setLeftColumnText] = useState('');
@@ -52,6 +76,25 @@ function App() {
   const [showColumnSeparators, setShowColumnSeparators] = useState(true);
   const [transposeSemitones, setTransposeSemitones] = useState<number>(0);
   const [fontSize, setFontSize] = useState<number>(14); // Default font size in pixels
+
+  // Save mode preference when it changes
+  useEffect(() => {
+    localStorage.setItem(MODE_STORAGE_KEY, mode);
+  }, [mode]);
+
+  // Save bar chart document when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(BARCHART_STORAGE_KEY, JSON.stringify(barChartDocument));
+    } catch (e) {
+      console.error('Failed to save bar chart document:', e);
+    }
+  }, [barChartDocument]);
+
+  // Handle mode change
+  const handleModeChange = useCallback((newMode: AppMode) => {
+    setMode(newMode);
+  }, []);
 
   // Undo/Redo history
   const [history, setHistory] = useState<HistoryState[]>([]);
@@ -428,20 +471,12 @@ function App() {
     
     // Get columns container and check settings
     const columnsContainer = element.querySelector('.columns-container') as HTMLElement;
-    const isRtl = columnsContainer?.classList.contains('rtl');
     const hasSeparators = !columnsContainer?.classList.contains('no-separators');
-    const originalColumns = columnsContainer ? Array.from(columnsContainer.children) as HTMLElement[] : [];
     
     // Hide CSS pseudo-element separators - we'll add real DOM elements instead
     columnsContainer?.classList.add('no-separators');
     
-    if (isRtl && columnsContainer && originalColumns.length > 0) {
-      // Remove RTL class and set normal row direction
-      columnsContainer.classList.remove('rtl');
-      columnsContainer.style.flexDirection = 'row';
-      // Reverse columns in DOM so they appear in correct visual order for RTL
-      [...originalColumns].reverse().forEach(col => columnsContainer.appendChild(col));
-    }
+    // Note: We no longer need to reverse columns for RTL since columns stay in same visual position
     
     // Set element to A4 dimensions for capture
     element.style.width = '794px';
@@ -522,13 +557,6 @@ function App() {
         columnsContainer?.classList.remove('no-separators');
       }
       
-      if (isRtl && columnsContainer && originalColumns.length > 0) {
-        // Restore RTL class
-        columnsContainer.classList.add('rtl');
-        columnsContainer.style.flexDirection = '';
-        // Restore original column order
-        originalColumns.forEach(col => columnsContainer.appendChild(col));
-      }
       document.body.classList.remove('pdf-export-mode');
     }
   }, [showStatusMessage]);
@@ -667,208 +695,249 @@ function App() {
   }, [toggleDirection, toggleGrid, handleSave, handleSaveAs, handleNew, handlePrint, handleUndo, handleRedo]);
 
   return (
-    <div className={`app ${direction}`} dir={direction}>
-      {/* Toolbar */}
-      <header className="toolbar">
-        {/* Branding Row */}
-        <div className="toolbar-row toolbar-row-branding">
-          <div className="app-branding">
-            <h1 className="app-title">ChordSheet Studio</h1>
-            <span className="app-author">By Ofir Nisimi</span>
+    <div className="app">
+      {/* Slim Header - Title and Help only */}
+      <header className="app-header">
+        <div className="app-branding">
+          <h1 className="app-title">ChordSheet Studio</h1>
+          <span className="app-author">By Ofir Nisimi</span>
+        </div>
+        <button
+          className="toolbar-button help-button"
+          onClick={(e) => {
+            (e.currentTarget as HTMLButtonElement).blur();
+            setShowHelpGuide(true);
+          }}
+          title="Help Guide"
+        >
+          ?
+        </button>
+      </header>
+
+{/* Main Layout with Sidebars */}
+      <div className="main-layout">
+        {/* Left Sidebar */}
+        <aside className="sidebar sidebar-left">
+          {/* Mode Toggle */}
+          <div className="sidebar-section">
+            <ModeToggle mode={mode} onModeChange={handleModeChange} />
           </div>
-          <button
-            className="toolbar-button help-button"
-            onClick={(e) => {
-              (e.currentTarget as HTMLButtonElement).blur();
-              setShowHelpGuide(true);
-            }}
-            title="Help Guide"
-          >
-            ?
-          </button>
-        </div>
 
-        {/* Main Buttons Row */}
-        <div className="toolbar-row toolbar-row-main">
           {/* File Actions */}
-          <div className="toolbar-section file-actions">
-          <button
-            className="toolbar-button"
-            onClick={handleNew}
-            title="New Document (Ctrl+N)"
-          >
-            📄 New
-          </button>
-          <button
-            className="toolbar-button"
-            onClick={() => setShowLoadDialog(true)}
-            title="Open Document (Ctrl+O)"
-          >
-            📂 Open
-          </button>
-          <button
-            className="toolbar-button"
-            onClick={handleSave}
-            title="Save Document (Ctrl+S)"
-          >
-            💾 Save
-          </button>
-          <button
-            className="toolbar-button"
-            onClick={handlePrint}
-            title="Print / Export PDF (Ctrl+P)"
-          >
-            🖨️ Print
-          </button>
-          <button
-            className="toolbar-button"
-            onClick={handleSavePdf}
-            title="Save directly as PDF file"
-          >
-            📑 Save PDF
-          </button>
-          <span className="toolbar-divider">|</span>
-          <button
-            className={`toolbar-button ${!canUndo ? 'disabled' : ''}`}
-            onClick={handleUndo}
-            disabled={!canUndo}
-            title="Undo (Ctrl+Z)"
-          >
-            ↩️ Undo
-          </button>
-          <button
-            className={`toolbar-button ${!canRedo ? 'disabled' : ''}`}
-            onClick={handleRedo}
-            disabled={!canRedo}
-            title="Redo (Ctrl+Y / Ctrl+Shift+Z)"
-          >
-            ↪️ Redo
-          </button>
-          <span className="toolbar-divider">|</span>
-          <button
-            className="toolbar-button"
-            onClick={handleExportToFile}
-            title="Export song to file (for transferring to another PC)"
-          >
-            📤 Export
-          </button>
-          <button
-            className="toolbar-button"
-            onClick={handleImportClick}
-            title="Import song from file"
-          >
-            📥 Import
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            style={{ display: 'none' }}
-            onChange={handleFileImport}
-          />
-        </div>
-        </div>
-
-        {/* Bottom Row */}
-        <div className="toolbar-row toolbar-row-secondary">
-          {/* View Actions */}
-          <div className="toolbar-section view-actions">
-          <button
-            className={`toolbar-button ${columnCount === 3 ? 'active' : ''}`}
-            onClick={toggleColumnCount}
-            aria-label={`Switch to ${columnCount === 2 ? '3' : '2'} columns`}
-            title="Toggle 3rd Column"
-          >
-            {columnCount === 2 ? '⊞ 2 Columns' : '⊟ 3 Columns'}
-          </button>
-          <button
-            className={`toolbar-button ${showColumnSeparators ? 'active' : ''}`}
-            onClick={() => setShowColumnSeparators(prev => !prev)}
-            title="Toggle column separator lines in print"
-          >
-            {showColumnSeparators ? '┃ Lines On' : '┃ Lines Off'}
-          </button>
-          <button
-            className={`toolbar-button direction-toggle ${direction === 'rtl' ? 'active' : ''}`}
-            onClick={toggleDirection}
-            aria-label={`Switch to ${direction === 'ltr' ? 'RTL' : 'LTR'} mode`}
-            title="Toggle Direction (Ctrl+L)"
-          >
-            {direction === 'ltr' ? '🔤 LTR → RTL' : '🔠 RTL → LTR'}
-          </button>
-        </div>
-
-        {/* Font Size Controls - force LTR to prevent RTL reversal */}
-        <div className="toolbar-section font-size-section" dir="ltr">
-          <span className="font-size-label">Font:</span>
-          <button
-            className="toolbar-button font-size-btn"
-            onClick={() => setFontSize(prev => Math.max(10, prev - 1))}
-            disabled={fontSize <= 10}
-            title="Decrease font size"
-          >
-            A−
-          </button>
-          <span className={`font-size-value ${fontSize !== 14 ? 'active' : ''}`}>
-            {fontSize}px
-          </span>
-          <button
-            className="toolbar-button font-size-btn"
-            onClick={() => setFontSize(prev => Math.min(20, prev + 1))}
-            disabled={fontSize >= 20}
-            title="Increase font size"
-          >
-            A+
-          </button>
-          {fontSize !== 14 && (
-            <button
-              className="toolbar-button font-size-reset"
-              onClick={() => setFontSize(14)}
-              title="Reset to default font size (14px)"
-            >
-              Reset
+          <div className="sidebar-section">
+            <span className="sidebar-label">File</span>
+            <button className="sidebar-button" onClick={handleNew} title="New Document (Ctrl+N)">
+              📄 New
             </button>
-          )}
-        </div>
-
-        {/* Transpose Controls - force LTR to prevent RTL reversal */}
-        <div className="toolbar-section transpose-section" dir="ltr">
-          <span className="transpose-label">Transpose:</span>
-          <button
-            className="toolbar-button transpose-btn"
-            onClick={() => setTransposeSemitones(prev => Math.max(-12, prev - 1))}
-            disabled={transposeSemitones <= -12}
-            title="Transpose down by 1 semitone"
-          >
-            −
-          </button>
-          <span className={`transpose-value ${transposeSemitones !== 0 ? 'active' : ''}`}>
-            {transposeSemitones > 0 ? '+' : ''}{transposeSemitones}
-          </span>
-          <button
-            className="toolbar-button transpose-btn"
-            onClick={() => setTransposeSemitones(prev => Math.min(12, prev + 1))}
-            disabled={transposeSemitones >= 12}
-            title="Transpose up by 1 semitone"
-          >
-            +
-          </button>
-          {transposeSemitones !== 0 && (
-            <button
-              className="toolbar-button transpose-reset"
-              onClick={() => setTransposeSemitones(0)}
-              title="Reset to original key"
-            >
-              Reset
+            <button className="sidebar-button" onClick={() => setShowLoadDialog(true)} title="Open Document (Ctrl+O)">
+              📂 Open
             </button>
+            <button className="sidebar-button" onClick={handleSave} title="Save Document (Ctrl+S)">
+              💾 Save
+            </button>
+            <button className="sidebar-button" onClick={handlePrint} title="Print / Export PDF (Ctrl+P)">
+              🖨️ Print
+            </button>
+            <button className="sidebar-button" onClick={handleSavePdf} title="Save directly as PDF file">
+              📑 Save PDF
+            </button>
+          </div>
+
+          {/* Edit Actions */}
+          <div className="sidebar-section">
+            <span className="sidebar-label">Edit</span>
+            <button
+              className={`sidebar-button ${!canUndo ? 'disabled' : ''}`}
+              onClick={handleUndo}
+              disabled={!canUndo}
+              title="Undo (Ctrl+Z)"
+            >
+              ↩️ Undo
+            </button>
+            <button
+              className={`sidebar-button ${!canRedo ? 'disabled' : ''}`}
+              onClick={handleRedo}
+              disabled={!canRedo}
+              title="Redo (Ctrl+Y)"
+            >
+              ↪️ Redo
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Editor */}
+        <main className="editor" ref={a4PageRef}>
+          {mode === 'lyrics' ? (
+            <A4Page
+              title={title}
+              onTitleChange={setTitle}
+              leftColumnText={leftColumnText}
+              onLeftColumnChange={setLeftColumnText}
+              middleColumnText={middleColumnText}
+              onMiddleColumnChange={setMiddleColumnText}
+              rightColumnText={rightColumnText}
+              onRightColumnChange={setRightColumnText}
+              leftColumnChords={leftColumnChords}
+              onLeftColumnChordsChange={setLeftColumnChords}
+              middleColumnChords={middleColumnChords}
+              onMiddleColumnChordsChange={setMiddleColumnChords}
+              rightColumnChords={rightColumnChords}
+              onRightColumnChordsChange={setRightColumnChords}
+              leftColumnIndicators={leftColumnIndicators}
+              onLeftColumnIndicatorsChange={setLeftColumnIndicators}
+              middleColumnIndicators={middleColumnIndicators}
+              onMiddleColumnIndicatorsChange={setMiddleColumnIndicators}
+              rightColumnIndicators={rightColumnIndicators}
+              onRightColumnIndicatorsChange={setRightColumnIndicators}
+              direction={direction}
+              showGrid={showGrid}
+              columnCount={columnCount}
+              showColumnSeparators={showColumnSeparators}
+              transposeSemitones={transposeSemitones}
+              fontSize={fontSize}
+            />
+          ) : (
+            <div className="a4-page-container">
+              <div className="a4-page">
+                <div className="a4-page-content">
+                  {/* Title Section - same as lyrics mode */}
+                  <div className="title-section">
+                    <input
+                      type="text"
+                      className="title-input"
+                      value={barChartDocument.title}
+                      onChange={(e) => setBarChartDocument(prev => ({ ...prev, title: e.target.value }))}
+                      placeholder="Enter song title..."
+                      aria-label="Song title"
+                      maxLength={100}
+                    />
+                  </div>
+                  
+                  {/* Bar Chart Editor */}
+                  <BarChartEditor
+                    document={barChartDocument}
+                    onDocumentChange={setBarChartDocument}
+                    direction={direction}
+                    columnCount={columnCount}
+                    fontSize={fontSize}
+                  />
+                </div>
+              </div>
+            </div>
           )}
-        </div>
+        </main>
+
+        {/* Right Sidebar */}
+        <aside className="sidebar sidebar-right">
+          {/* Import/Export */}
+          <div className="sidebar-section">
+            <span className="sidebar-label">Transfer</span>
+            <button className="sidebar-button" onClick={handleExportToFile} title="Export song to file">
+              📤 Export
+            </button>
+            <button className="sidebar-button" onClick={handleImportClick} title="Import song from file">
+              📥 Import
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              style={{ display: 'none' }}
+              onChange={handleFileImport}
+            />
+          </div>
+
+          {/* View Options */}
+          <div className="sidebar-section">
+            <span className="sidebar-label">View</span>
+            <button
+              className={`sidebar-button ${columnCount === 3 ? 'active' : ''}`}
+              onClick={toggleColumnCount}
+              title="Toggle 3rd Column"
+            >
+              {columnCount === 2 ? '⊞ 2 Cols' : '⊟ 3 Cols'}
+            </button>
+            <button
+              className={`sidebar-button ${showColumnSeparators ? 'active' : ''}`}
+              onClick={() => setShowColumnSeparators(prev => !prev)}
+              title="Toggle column separator lines"
+            >
+              {showColumnSeparators ? '┃ Lines' : '┃ No Lines'}
+            </button>
+            <button
+              className={`sidebar-button direction-toggle ${direction === 'rtl' ? 'active' : ''}`}
+              onClick={toggleDirection}
+              title="Toggle Direction (Ctrl+L)"
+            >
+              {direction === 'ltr' ? '→ LTR' : '← RTL'}
+            </button>
+          </div>
+
+          {/* Font Size */}
+          <div className="sidebar-section">
+            <span className="sidebar-label">Font</span>
+            <div className="sidebar-control-row">
+              <button
+                className="sidebar-btn-small"
+                onClick={() => setFontSize(prev => Math.min(20, prev + 1))}
+                disabled={fontSize >= 20}
+                title="Increase font size"
+              >
+                +A
+              </button>
+              <span className={`sidebar-value ${fontSize !== 14 ? 'active' : ''}`}>{fontSize}px</span>
+              <button
+                className="sidebar-btn-small"
+                onClick={() => setFontSize(prev => Math.max(10, prev - 1))}
+                disabled={fontSize <= 10}
+                title="Decrease font size"
+              >
+                −A
+              </button>
+            </div>
+            {fontSize !== 14 && (
+              <button className="sidebar-btn-reset" onClick={() => setFontSize(14)} title="Reset font">
+                Reset
+              </button>
+            )}
+          </div>
+
+          {/* Transpose */}
+          <div className="sidebar-section">
+            <span className="sidebar-label">Transpose</span>
+            <div className="sidebar-control-row">
+              <button
+                className="sidebar-btn-small"
+                onClick={() => setTransposeSemitones(prev => Math.min(12, prev + 1))}
+                disabled={transposeSemitones >= 12}
+                title="Transpose up"
+              >
+                +
+              </button>
+              <span className={`sidebar-value ${transposeSemitones !== 0 ? 'active' : ''}`}>
+                {transposeSemitones > 0 ? '+' : ''}{transposeSemitones}
+              </span>
+              <button
+                className="sidebar-btn-small"
+                onClick={() => setTransposeSemitones(prev => Math.max(-12, prev - 1))}
+                disabled={transposeSemitones <= -12}
+                title="Transpose down"
+              >
+                −
+              </button>
+            </div>
+            {transposeSemitones !== 0 && (
+              <button className="sidebar-btn-reset" onClick={() => setTransposeSemitones(0)} title="Reset transpose">
+                Reset
+              </button>
+            )}
+          </div>
 
           {/* Status */}
-          <div className="toolbar-section status-section">
+          <div className="sidebar-section sidebar-status">
             {currentFileName && (
               <span className="current-file" title={currentFileName}>
-                {currentFileName}
+                📁 {currentFileName}
               </span>
             )}
             {saveStatus === 'saved' && <span className="save-status saved">✓ Saved</span>}
@@ -876,40 +945,8 @@ function App() {
             {saveStatus === 'saving' && <span className="save-status saving">⏳ Saving...</span>}
             {statusMessage && <span className="status-message">{statusMessage}</span>}
           </div>
-        </div>
-      </header>
-
-      {/* Main Editor */}
-      <main className="editor" ref={a4PageRef}>
-        <A4Page
-          title={title}
-          onTitleChange={setTitle}
-          leftColumnText={leftColumnText}
-          onLeftColumnChange={setLeftColumnText}
-          middleColumnText={middleColumnText}
-          onMiddleColumnChange={setMiddleColumnText}
-          rightColumnText={rightColumnText}
-          onRightColumnChange={setRightColumnText}
-          leftColumnChords={leftColumnChords}
-          onLeftColumnChordsChange={setLeftColumnChords}
-          middleColumnChords={middleColumnChords}
-          onMiddleColumnChordsChange={setMiddleColumnChords}
-          rightColumnChords={rightColumnChords}
-          onRightColumnChordsChange={setRightColumnChords}
-          leftColumnIndicators={leftColumnIndicators}
-          onLeftColumnIndicatorsChange={setLeftColumnIndicators}
-          middleColumnIndicators={middleColumnIndicators}
-          onMiddleColumnIndicatorsChange={setMiddleColumnIndicators}
-          rightColumnIndicators={rightColumnIndicators}
-          onRightColumnIndicatorsChange={setRightColumnIndicators}
-          direction={direction}
-          showGrid={showGrid}
-          columnCount={columnCount}
-          showColumnSeparators={showColumnSeparators}
-          transposeSemitones={transposeSemitones}
-          fontSize={fontSize}
-        />
-      </main>
+        </aside>
+      </div>
 
       {/* Save Dialog */}
       {showSaveDialog && (

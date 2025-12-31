@@ -2,6 +2,9 @@
  * Type definitions for ChordSheet Studio application
  */
 
+// Re-export Bar Chart types
+export * from './barChart';
+
 /** Represents a chord placed above lyrics text */
 export interface Chord {
   id: string;

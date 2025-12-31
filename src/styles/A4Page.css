@@ -98,10 +98,9 @@
   gap: 30px;
 }
 
-/* RTL Support */
-.columns-container.rtl {
-  flex-direction: row-reverse;
-}
+/* RTL Support - text direction only, columns stay in same visual position */
+/* Note: flex-direction is NOT reversed - columns remain left-to-right visually */
+/* Only text within columns is RTL */
 
 .column {
   flex: 1;
@@ -111,9 +110,10 @@
 }
 
 /* Column separator line - very light grey, visible in screen and print */
+/* Since columns don't reverse in RTL, separator logic is the same for both directions */
 
-/* LTR 2 columns: line after first (left) column */
-.columns-container.columns-2:not(.rtl) .column:first-child::after {
+/* 2 columns: line after first (left) column */
+.columns-container.columns-2 .column:first-child::after {
   content: '';
   position: absolute;
   top: 0;
@@ -123,34 +123,12 @@
   background-color: #e0e0e0;
 }
 
-/* LTR 3 columns: line after first and second columns */
-.columns-container.columns-3:not(.rtl) .column:not(:last-child)::after {
+/* 3 columns: line after first and second columns */
+.columns-container.columns-3 .column:not(:last-child)::after {
   content: '';
   position: absolute;
   top: 0;
   right: -15px; /* Half of the 30px gap */
-  width: 1px;
-  height: 100%;
-  background-color: #e0e0e0;
-}
-
-/* RTL 2 columns: line to left of last (right) DOM column - visually between columns */
-.columns-container.rtl.columns-2 .column:last-child::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -28px;
-  width: 1px;
-  height: 100%;
-  background-color: #e0e0e0;
-}
-
-/* RTL 3 columns: line to left of middle and right columns (not first/left) */
-.columns-container.rtl.columns-3 .column:not(:first-child)::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -15px;
   width: 1px;
   height: 100%;
   background-color: #e0e0e0;
