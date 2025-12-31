@@ -47,8 +47,9 @@ export interface BarChartDocument {
   title: string;
   artist?: string;
   direction: TextDirection;
-  columns: 1 | 2 | 3;
-  lines: BarChartLine[];
+  columns: 1 | 2;
+  leftLines: BarChartLine[];
+  rightLines: BarChartLine[];
   measuresPerLine: number;
 }
 
@@ -104,7 +105,8 @@ export function createDefaultBarChartDocument(): BarChartDocument {
     title: '',
     direction: 'ltr',
     columns: 2,
-    lines: [],
+    leftLines: [],
+    rightLines: [],
     measuresPerLine: 4,
   };
 }

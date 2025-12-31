@@ -1,0 +1,107 @@
+/**
+ * BeatPosition Component Styles
+ */
+
+.beat-position {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  position: relative;
+  padding: 4px 2px;
+  box-sizing: border-box;
+}
+
+/* Beat divider lines between beats */
+.beat-position:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  width: 1px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* RTL: divider on left side */
+.beat-position.rtl:not(:last-child)::after {
+  right: auto;
+  left: 0;
+}
+
+.beat-position:hover {
+  background-color: rgba(52, 152, 219, 0.1);
+}
+
+.beat-position:focus {
+  outline: none;
+  background-color: rgba(52, 152, 219, 0.15);
+}
+
+.beat-position.selected {
+  background-color: rgba(52, 152, 219, 0.2);
+  box-shadow: inset 0 0 0 2px #3498db;
+}
+
+/* Empty beat state */
+.beat-position.empty {
+  color: transparent;
+}
+
+.beat-position.empty:hover {
+  background-color: rgba(52, 152, 219, 0.08);
+}
+
+.beat-position.empty::before {
+  content: '+';
+  position: absolute;
+  color: rgba(0, 0, 0, 0.15);
+  font-size: 14px;
+  font-weight: 300;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.beat-position.empty:hover::before {
+  opacity: 1;
+}
+
+/* Hold/continuation marker */
+.beat-position.hold .beat-content {
+  color: #666;
+  font-size: 1.2em;
+  font-weight: 400;
+}
+
+/* Chord display */
+.beat-position.has-chord .beat-content {
+  color: #2980b9;
+  font-weight: 600;
+  font-size: 0.9em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  padding: 0 2px;
+}
+
+.beat-content {
+  display: block;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .beat-position {
+    padding: 3px 1px;
+  }
+  
+  .beat-position.has-chord .beat-content {
+    font-size: 0.8em;
+  }
+}

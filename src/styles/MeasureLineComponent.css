@@ -1,0 +1,41 @@
+/**
+ * MeasureLineComponent Styles
+ */
+
+.measure-line {
+  display: flex;
+  width: 100%;
+  margin-bottom: 16px;
+  align-items: stretch;
+}
+
+/* Ensure measures are evenly distributed */
+.measure-line > .measure {
+  flex: 1;
+  min-width: 0;
+}
+
+/* RTL: reverse the measure order */
+.measure-line.rtl {
+  flex-direction: row-reverse;
+}
+
+/* Spacing between measure lines */
+.measure-line:last-child {
+  margin-bottom: 8px;
+}
+
+/* Print styles */
+@media print {
+  .measure-line {
+    margin-bottom: 12px;
+    break-inside: avoid;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .measure-line {
+    margin-bottom: 12px;
+  }
+}

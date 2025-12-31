@@ -1,0 +1,118 @@
+/**
+ * Measure Component Styles
+ */
+
+.measure {
+  display: flex;
+  align-items: stretch;
+  height: 42px;
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  background-color: #ffffff;
+}
+
+/* Bar lines */
+.bar-line {
+  width: 2px;
+  background-color: #333;
+  flex-shrink: 0;
+}
+
+.bar-line-left {
+  /* Left bar line - only show on first measure of line */
+  display: block;
+}
+
+.measure:not(.first) .bar-line-left {
+  width: 0;
+}
+
+.bar-line-right {
+  position: relative;
+  display: block;
+}
+
+/* Double bar line for ending measures */
+.bar-line-right.double {
+  width: 4px;
+  background: linear-gradient(to right, #333 2px, transparent 2px, transparent 3px, #333 3px);
+}
+
+/* Alternative double bar style: thin then thick */
+.bar-line-right.double::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: #333;
+}
+
+/* Beats container */
+.beats-container {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: stretch;
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+/* Hover effect on measure */
+.measure:hover {
+  background-color: rgba(52, 152, 219, 0.03);
+}
+
+/* First and last measure styling */
+.measure.first .bar-line-left {
+  /* First measure in line shows left bar line */
+  display: block;
+}
+
+.measure.last:not(.ending) .bar-line-right {
+  /* Normal bar line for last measure (unless it's an ending) */
+  width: 2px;
+}
+
+/* RTL adjustments */
+.measure.rtl {
+  flex-direction: row-reverse;
+}
+
+.measure.rtl .beats-container {
+  flex-direction: row-reverse;
+}
+
+.measure.rtl:not(.first) .bar-line-left {
+  /* In RTL, hide left bar line for non-first measures */
+  width: 0;
+}
+
+.measure.rtl .bar-line-right.double::after {
+  right: auto;
+  left: -4px;
+}
+
+/* Print styles */
+@media print {
+  .measure {
+    height: 38px;
+  }
+  
+  .bar-line {
+    background-color: #000;
+  }
+  
+  .beats-container {
+    border-color: rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .measure {
+    height: 36px;
+  }
+}

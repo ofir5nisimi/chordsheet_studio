@@ -51,7 +51,23 @@ function App() {
     try {
       const saved = localStorage.getItem(BARCHART_STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved) as BarChartDocument;
+        const parsed = JSON.parse(saved);
+        // Migrate old data structure (lines -> leftLines/rightLines)
+        if (parsed.lines && !parsed.leftLines) {
+          return {
+            ...createDefaultBarChartDocument(),
+            ...parsed,
+            leftLines: parsed.lines || [],
+            rightLines: [],
+          };
+        }
+        // Ensure leftLines and rightLines exist
+        return {
+          ...createDefaultBarChartDocument(),
+          ...parsed,
+          leftLines: parsed.leftLines || [],
+          rightLines: parsed.rightLines || [],
+        };
       }
     } catch (e) {
       console.error('Failed to load bar chart document:', e);
@@ -72,7 +88,7 @@ function App() {
   const [leftColumnIndicators, setLeftColumnIndicators] = useState<Set<number>>(new Set());
   const [middleColumnIndicators, setMiddleColumnIndicators] = useState<Set<number>>(new Set());
   const [rightColumnIndicators, setRightColumnIndicators] = useState<Set<number>>(new Set());
-  const [columnCount, setColumnCount] = useState<2 | 3>(2);
+  const [columnCount, setColumnCount] = useState<1 | 2 | 3>(2);
   const [showColumnSeparators, setShowColumnSeparators] = useState(true);
   const [transposeSemitones, setTransposeSemitones] = useState<number>(0);
   const [fontSize, setFontSize] = useState<number>(14); // Default font size in pixels
@@ -91,9 +107,19 @@ function App() {
     }
   }, [barChartDocument]);
 
-  // Handle mode change
+  // Handle mode change - adjust column count if needed
   const handleModeChange = useCallback((newMode: AppMode) => {
     setMode(newMode);
+    // Adjust column count for mode compatibility
+    if (newMode === 'barChart') {
+      // Bar Chart mode only supports 1 or 2 columns
+      // If currently at 3 columns, switch to 2
+      setColumnCount(prev => prev === 3 ? 2 : prev);
+    } else {
+      // Lyrics mode only supports 2 or 3 columns
+      // If currently at 1 column, switch to 2
+      setColumnCount(prev => prev === 1 ? 2 : prev);
+    }
   }, []);
 
   // Undo/Redo history
@@ -266,66 +292,64 @@ function App() {
     setShowGrid((prev) => !prev);
   }, []);
 
-  // Toggle column count with content redistribution
-  // Note: offsetX is NOT scaled because it's a fine-tuning offset from character position,
-  // not an absolute position. Character positions remain valid across column width changes.
+  // Toggle column count - different behavior for each mode
+  // For Lyrics mode: 2 ↔ 3 with content redistribution
+  // For Bar Chart mode: 1 ↔ 2 (simple toggle)
   const toggleColumnCount = useCallback(() => {
-    setColumnCount((prev) => {
-      if (prev === 2) {
-        // Moving from 2 to 3 columns
-        // In RTL: right(1st) → left(2nd) becomes right(1st) → middle(2nd) → left(3rd)
-        // Move the 2nd column content to middle
-        if (direction === 'ltr') {
-          // LTR: Move right column content to middle, clear right
-          setMiddleColumnText(rightColumnText);
-          setMiddleColumnChords([...rightColumnChords]);
-          setRightColumnText('');
-          setRightColumnChords([]);
-        } else {
-          // RTL: Move left column content to middle, clear left
-          setMiddleColumnText(leftColumnText);
-          setMiddleColumnChords([...leftColumnChords]);
-          setLeftColumnText('');
-          setLeftColumnChords([]);
-        }
-        return 3;
-      } else {
-        // Moving from 3 to 2 columns
-        // Need to merge middle column content into the appropriate column
-        if (direction === 'ltr') {
-          if (middleColumnText.trim()) {
-            // Append middle content to right column
-            const newRightText = middleColumnText + (rightColumnText ? '\n' + rightColumnText : '');
-            const middleLineCount = middleColumnText.split('\n').length;
-            // Shift right column chord line indices by the number of middle column lines
-            const adjustedRightChords = rightColumnChords.map(chord => ({
-              ...chord,
-              lineIndex: chord.lineIndex + middleLineCount
-            }));
-            setRightColumnText(newRightText);
-            setRightColumnChords([...middleColumnChords, ...adjustedRightChords]);
+    if (mode === 'barChart') {
+      // Bar Chart mode: simple toggle between 1 and 2
+      setColumnCount((prev) => prev === 1 ? 2 : 1);
+    } else {
+      // Lyrics mode: 2 ↔ 3 with content redistribution
+      setColumnCount((prev) => {
+        if (prev === 2) {
+          // Moving from 2 to 3 columns
+          if (direction === 'ltr') {
+            setMiddleColumnText(rightColumnText);
+            setMiddleColumnChords([...rightColumnChords]);
+            setRightColumnText('');
+            setRightColumnChords([]);
+          } else {
+            setMiddleColumnText(leftColumnText);
+            setMiddleColumnChords([...leftColumnChords]);
+            setLeftColumnText('');
+            setLeftColumnChords([]);
           }
-          setMiddleColumnText('');
-          setMiddleColumnChords([]);
+          return 3;
         } else {
-          // RTL: Append middle content to left column
-          if (middleColumnText.trim()) {
-            const newLeftText = middleColumnText + (leftColumnText ? '\n' + leftColumnText : '');
-            const middleLineCount = middleColumnText.split('\n').length;
-            const adjustedLeftChords = leftColumnChords.map(chord => ({
-              ...chord,
-              lineIndex: chord.lineIndex + middleLineCount
-            }));
-            setLeftColumnText(newLeftText);
-            setLeftColumnChords([...middleColumnChords, ...adjustedLeftChords]);
+          // Moving from 3 (or 1) to 2 columns
+          if (direction === 'ltr') {
+            if (middleColumnText.trim()) {
+              const newRightText = middleColumnText + (rightColumnText ? '\n' + rightColumnText : '');
+              const middleLineCount = middleColumnText.split('\n').length;
+              const adjustedRightChords = rightColumnChords.map(chord => ({
+                ...chord,
+                lineIndex: chord.lineIndex + middleLineCount
+              }));
+              setRightColumnText(newRightText);
+              setRightColumnChords([...middleColumnChords, ...adjustedRightChords]);
+            }
+            setMiddleColumnText('');
+            setMiddleColumnChords([]);
+          } else {
+            if (middleColumnText.trim()) {
+              const newLeftText = middleColumnText + (leftColumnText ? '\n' + leftColumnText : '');
+              const middleLineCount = middleColumnText.split('\n').length;
+              const adjustedLeftChords = leftColumnChords.map(chord => ({
+                ...chord,
+                lineIndex: chord.lineIndex + middleLineCount
+              }));
+              setLeftColumnText(newLeftText);
+              setLeftColumnChords([...middleColumnChords, ...adjustedLeftChords]);
+            }
+            setMiddleColumnText('');
+            setMiddleColumnChords([]);
           }
-          setMiddleColumnText('');
-          setMiddleColumnChords([]);
+          return 2;
         }
-        return 2;
-      }
-    });
-  }, [direction, leftColumnText, leftColumnChords, middleColumnText, middleColumnChords, rightColumnText, rightColumnChords]);
+      });
+    }
+  }, [mode, direction, leftColumnText, leftColumnChords, middleColumnText, middleColumnChords, rightColumnText, rightColumnChords]);
 
   // Create new document
   const handleNew = useCallback(() => {
@@ -353,6 +377,9 @@ function App() {
     setHasUnsavedChanges(false);
     setSaveStatus(null);
     clearAutoSave();
+    // Reset Bar Chart document
+    setBarChartDocument(createDefaultBarChartDocument());
+    localStorage.removeItem(BARCHART_STORAGE_KEY);
     showStatusMessage('New document created');
   }, [showStatusMessage]);
 
@@ -791,7 +818,7 @@ function App() {
               onRightColumnIndicatorsChange={setRightColumnIndicators}
               direction={direction}
               showGrid={showGrid}
-              columnCount={columnCount}
+              columnCount={columnCount === 1 ? 2 : columnCount}
               showColumnSeparators={showColumnSeparators}
               transposeSemitones={transposeSemitones}
               fontSize={fontSize}
@@ -818,7 +845,7 @@ function App() {
                     document={barChartDocument}
                     onDocumentChange={setBarChartDocument}
                     direction={direction}
-                    columnCount={columnCount}
+                    columnCount={columnCount === 3 ? 2 : columnCount}
                     fontSize={fontSize}
                   />
                 </div>
@@ -851,11 +878,11 @@ function App() {
           <div className="sidebar-section">
             <span className="sidebar-label">View</span>
             <button
-              className={`sidebar-button ${columnCount === 3 ? 'active' : ''}`}
+              className={`sidebar-button ${(mode === 'barChart' && columnCount === 2) || (mode === 'lyrics' && columnCount === 3) ? 'active' : ''}`}
               onClick={toggleColumnCount}
-              title="Toggle 3rd Column"
+              title={mode === 'barChart' ? 'Toggle columns (1↔2)' : 'Toggle 3rd Column'}
             >
-              {columnCount === 2 ? '⊞ 2 Cols' : '⊟ 3 Cols'}
+              {columnCount === 1 ? '⊞ 1 Col' : columnCount === 2 ? '⊞ 2 Cols' : '⊟ 3 Cols'}
             </button>
             <button
               className={`sidebar-button ${showColumnSeparators ? 'active' : ''}`}

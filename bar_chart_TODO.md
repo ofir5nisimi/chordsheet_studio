@@ -60,69 +60,90 @@ Set up the foundational architecture for the Bar Chart mode, including the mode 
 
 ---
 
-## Phase 2: Measure Rendering
+## Phase 2: Measure Rendering ✅ COMPLETED
 
 ### Objectives
 Implement the visual rendering of measures (bars) with their 4 beat positions.
 
 ### Tasks
 
-- [ ] **2.1 Create Measure Component**
+- [x] **2.1 Create Measure Component**
   - Create `src/components/Measure.tsx`
   - Create `src/styles/Measure.css`
   - Render a measure with 4 beat position slots
   - Display bar lines (left and right borders)
   - Show beat dividers between positions
 
-- [ ] **2.2 Create BeatPosition Component**
+- [x] **2.2 Create BeatPosition Component**
   - Create `src/components/BeatPosition.tsx`
   - Create `src/styles/BeatPosition.css`
   - Render individual beat slot
   - Display chord name if present
   - Display continuation marker ("-") if beat holds previous chord
-  - Display empty state for unfilled beats
+  - Display empty state for unfilled beats (shows "+" on hover)
 
-- [ ] **2.3 Implement Double Bar Line**
+- [x] **2.3 Implement Double Bar Line**
   - Add `isEnding` property to Measure
   - Render double bar line (||) on the right side of final measure
   - Automatically mark last measure in document as ending
   - Style double bar line distinctly (thicker/double stroke)
 
-- [ ] **2.4 Create MeasureLineComponent**
+- [x] **2.4 Create MeasureLineComponent**
   - Create `src/components/MeasureLineComponent.tsx`
   - Create `src/styles/MeasureLineComponent.css`
   - Render a horizontal row of measures
   - Handle configurable number of measures per line
 
-- [ ] **2.5 Add Measures Per Line Configuration**
-  - Add UI control for setting measures per line (e.g., dropdown or number input)
+- [x] **2.5 Add Measures Per Line Configuration**
+  - Add UI control for setting measures per line (stepper control with +/- buttons)
   - Store setting in document state
-  - Apply setting to all MeasureLine components
-  - Default value: 4 measures per line
+  - Apply setting to all MeasureLine components (updates existing lines too)
+  - Default value: 4 measures per line (range: 1-8)
 
-- [ ] **2.6 Implement Basic BarChartEditor Content**
-  - Initialize with sample data (one section, one measure line)
+- [x] **2.6 Implement Basic BarChartEditor Content**
   - Render MeasureLineComponent for each measure line
-  - Handle empty state (no lines yet)
+  - Handle empty state (no lines yet - shows helpful message)
+  - Separate columns with their own add buttons at the top
 
-- [ ] **2.7 Style Measures for A4 Layout**
+- [x] **2.7 Style Measures for A4 Layout**
   - Ensure measures fit within column widths
-  - Test with 1, 2, and 3 column layouts
+  - Test with 1 and 2 column layouts (Bar Chart mode limited to 1-2 columns)
   - Maintain consistent measure width based on configuration
+
+- [x] **2.8 Create SectionHeader Component** (moved from Phase 4)
+  - Create `src/components/SectionHeader.tsx`
+  - Create `src/styles/SectionHeader.css`
+  - Render section name with distinct styling
+  - Make section text editable (inline editing)
+
+- [x] **2.9 Implement Per-Column Add Buttons**
+  - Each column has its own "+ Section" and "+ Measures" buttons
+  - Buttons positioned at the top of each column for easy access
+  - Content flows below the buttons
+
+- [x] **2.10 Column Layout for Bar Chart Mode**
+  - Supports 1 or 2 columns only (3 columns removed for Bar Chart)
+  - Mode transition adjusts columns automatically:
+    - Lyrics → Bar Chart: 3 columns becomes 2
+    - Bar Chart → Lyrics: 1 column becomes 2
+  - Separate leftLines and rightLines in document structure
 
 ### Acceptance Criteria
 
-- [ ] Measures display as rectangular boxes with visible borders
-- [ ] Each measure shows 4 distinct beat positions
-- [ ] Beat positions are evenly sized within the measure
-- [ ] Measures per line control is visible and functional
-- [ ] Changing measures per line updates the display immediately
-- [ ] Measures align perfectly across multiple lines
-- [ ] Layout works correctly in 1, 2, and 3 column modes
-- [ ] Empty beat positions are clearly distinguishable from filled ones
-- [ ] Measure width is consistent across the entire document
-- [ ] Final measure displays a double bar line (||) on the right side
-- [ ] Double bar line is visually distinct from regular bar lines
+- [x] Measures display as rectangular boxes with visible borders
+- [x] Each measure shows 4 distinct beat positions
+- [x] Beat positions are evenly sized within the measure
+- [x] Measures per line control is visible and functional
+- [x] Changing measures per line updates all existing lines immediately
+- [x] Measures align perfectly across multiple lines
+- [x] Layout works correctly in 1 and 2 column modes
+- [x] Empty beat positions are clearly distinguishable (show "+" on hover)
+- [x] Measure width is consistent across the entire document
+- [x] Final measure displays a double bar line (||) on the right side
+- [x] Double bar line is visually distinct from regular bar lines
+- [x] New button resets Bar Chart document properly
+- [x] Data migrates correctly from old format (lines → leftLines/rightLines)
+- [x] Add buttons are at the top of each column for easy access
 
 ---
 
@@ -179,31 +200,29 @@ Enable users to add, edit, and remove chords from beat positions using the exist
 
 ---
 
-## Phase 4: Sections & Line Management
+## Phase 4: Sections & Line Management (Partially Complete)
 
 ### Objectives
 Implement section headers and the ability to add, remove, and reorder different line types.
 
 ### Tasks
 
-- [ ] **4.1 Create SectionHeader Component**
+- [x] **4.1 Create SectionHeader Component** (Done in Phase 2)
   - Create `src/components/SectionHeader.tsx`
   - Create `src/styles/SectionHeader.css`
   - Render section name with distinct styling
   - Make section text editable (inline editing)
-  - Support section type selection (Verse, Chorus, etc.)
+  - ~~Support section type selection (Verse, Chorus, etc.)~~ (simplified to free text)
 
-- [ ] **4.2 Create BarChartToolbar Component**
-  - Create `src/components/BarChartToolbar.tsx`
-  - Create `src/styles/BarChartToolbar.css`
-  - Add "Add Section" button
-  - Add "Add Measure Line" button
-  - Position toolbar appropriately in the editor
+- [x] **4.2 Implement Per-Column Add Buttons** (Done in Phase 2)
+  - Add "+ Section" button per column
+  - Add "+ Measures" button per column
+  - Position buttons at top of each column for easy access
 
-- [ ] **4.3 Implement Add Line Functionality**
-  - "Add Section" creates a new SectionLine at the end
-  - "Add Measure Line" creates a new MeasureLine at the end
-  - Option to insert line at specific position (between existing lines)
+- [x] **4.3 Implement Add Line Functionality**
+  - "+ Section" creates a new SectionLine in that column
+  - "+ Measures" creates a new MeasureLine in that column
+  - ~~Option to insert line at specific position~~ (Future enhancement)
 
 - [ ] **4.4 Implement Delete Line Functionality**
   - Add delete button/icon for each line
@@ -295,34 +314,33 @@ Implement full RTL (Right-to-Left) support for the Bar Chart mode.
 
 ---
 
-## Phase 6: Persistence & Storage
+## Phase 6: Persistence & Storage (Partially Complete)
 
 ### Objectives
 Implement data persistence for Bar Chart documents, separate from Lyrics mode data.
 
 ### Tasks
 
-- [ ] **6.1 Define Storage Keys**
-  - Add new localStorage key for Bar Chart data: `barChartDocument`
-  - Keep existing `lyricsDocument` key unchanged
+- [x] **6.1 Define Storage Keys**
+  - Add new localStorage key for Bar Chart data: `guitar-chords-barchart`
+  - Keep existing Lyrics mode keys unchanged
 
-- [ ] **6.2 Implement Save Functionality**
-  - Auto-save Bar Chart document on changes
-  - Debounce saves to avoid excessive writes
-  - Use existing storage utility patterns
+- [x] **6.2 Implement Save Functionality**
+  - Auto-save Bar Chart document on changes (via useEffect)
+  - Saves to localStorage automatically
 
-- [ ] **6.3 Implement Load Functionality**
+- [x] **6.3 Implement Load Functionality**
   - Load Bar Chart document on app initialization
   - Handle case where no saved data exists (initialize with default)
-  - Validate loaded data structure
+  - Migrate old data structure (lines → leftLines/rightLines)
 
 - [ ] **6.4 Update Storage Utility**
   - Add functions to `src/utils/storage.ts` for Bar Chart data
   - `saveBarChartDocument(doc: BarChartDocument)`
   - `loadBarChartDocument(): BarChartDocument | null`
 
-- [ ] **6.5 Mode-Specific Storage**
-  - Store current mode preference
+- [x] **6.5 Mode-Specific Storage**
+  - Store current mode preference in localStorage
   - Load correct mode on app start
 
 - [ ] **6.6 Extend FileDialog for Bar Chart**

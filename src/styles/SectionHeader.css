@@ -1,0 +1,71 @@
+/**
+ * SectionHeader Component Styles
+ */
+
+.section-header {
+  width: 100%;
+  padding: 8px 4px;
+  margin-bottom: 8px;
+  margin-top: 12px;
+}
+
+.section-header:first-child {
+  margin-top: 0;
+}
+
+.section-text {
+  display: block;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #2c3e50;
+  padding: 4px 0;
+}
+
+.section-input {
+  width: 100%;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #2c3e50;
+  border: none;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.2);
+  background: transparent;
+  padding: 4px 0;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.section-input:focus {
+  border-bottom-color: #3498db;
+}
+
+.section-input::placeholder {
+  color: #aaa;
+  font-weight: normal;
+  font-style: italic;
+}
+
+/* RTL support */
+.section-header.rtl {
+  text-align: right;
+}
+
+.section-header.rtl .section-input {
+  text-align: right;
+  direction: rtl;
+}
+
+/* Print styles */
+@media print {
+  .section-header {
+    margin-bottom: 6px;
+    margin-top: 10px;
+  }
+  
+  .section-text {
+    font-size: 1em;
+  }
+  
+  .section-input {
+    border: none;
+  }
+}

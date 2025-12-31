@@ -18,7 +18,7 @@ export interface ChordSheetDocument {
   rightColumnChords: PlacedChord[];
   direction: TextDirection;
   showGrid: boolean;
-  columnCount: 2 | 3;
+  columnCount: 1 | 2 | 3;
   fontSize?: number;
   createdAt: string;
   updatedAt: string;
