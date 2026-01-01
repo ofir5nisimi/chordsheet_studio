@@ -4,7 +4,8 @@ import '../styles/BeatPosition.css';
 
 interface BeatPositionProps {
   beat: Beat;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent) => void;
+  onRightClick?: (event: React.MouseEvent) => void;
   isSelected?: boolean;
   direction?: 'ltr' | 'rtl';
 }
@@ -14,10 +15,13 @@ interface BeatPositionProps {
  * 
  * Renders an individual beat slot within a measure.
  * Shows the chord name, continuation marker ("-"), or empty state.
+ * Left-click: Opens chord selector
+ * Right-click: Opens remove option (when chord exists)
  */
 const BeatPosition: React.FC<BeatPositionProps> = ({
   beat,
   onClick,
+  onRightClick,
   isSelected = false,
   direction = 'ltr',
 }) => {
@@ -36,19 +40,41 @@ const BeatPosition: React.FC<BeatPositionProps> = ({
   const isHold = beat.isHold;
   const hasChord = !!beat.chord;
 
+  const handleClick = (e: React.MouseEvent) => {
+    onClick?.(e);
+  };
+
+  const handleRightClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Only trigger right-click if there's a chord to remove
+    if (hasChord) {
+      onRightClick?.(e);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      // Create a synthetic mouse event for keyboard activation
+      const syntheticEvent = {
+        target: e.target,
+        currentTarget: e.currentTarget,
+        clientX: (e.currentTarget as HTMLElement).getBoundingClientRect().left,
+        clientY: (e.currentTarget as HTMLElement).getBoundingClientRect().bottom,
+      } as unknown as React.MouseEvent;
+      onClick?.(syntheticEvent);
+    }
+  };
+
   return (
     <div
       className={`beat-position beat-${beat.position} ${isEmpty ? 'empty' : ''} ${isHold ? 'hold' : ''} ${hasChord ? 'has-chord' : ''} ${isSelected ? 'selected' : ''} ${direction}`}
-      onClick={onClick}
+      onClick={handleClick}
+      onContextMenu={handleRightClick}
       role="button"
       tabIndex={0}
       aria-label={`Beat ${beat.position}${content ? `: ${content}` : ', empty'}`}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick?.();
-        }
-      }}
+      onKeyDown={handleKeyDown}
     >
       <span className="beat-content">{content}</span>
     </div>

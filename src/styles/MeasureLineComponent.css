@@ -7,12 +7,17 @@
   width: 100%;
   margin-bottom: 16px;
   align-items: stretch;
+  overflow: visible;
 }
 
-/* Ensure measures are evenly distributed */
+/* Measures share space but don't clip content */
 .measure-line > .measure {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 0%;
+}
+
+/* Expanded measures (with multiple chords) need more space */
+.measure-line > .measure.expanded {
+  flex: 2 1 0%;
 }
 
 /* RTL: reverse the measure order */

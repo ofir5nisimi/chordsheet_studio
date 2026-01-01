@@ -146,9 +146,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0;
   border-left: 1px solid #e0e0e0;
   padding-left: 12px;
+  overflow: visible;
 }
 
 .bar-chart-column.left {
@@ -165,6 +165,7 @@
 .column-content {
   flex: 1;
   min-height: 100px;
+  overflow: visible;
 }
 
 /* Column action buttons - at top of column */
@@ -258,6 +259,29 @@
   .bar-chart-columns {
     padding: 0;
   }
+}
+
+/* Chord remove button */
+.chord-remove-overlay {
+  display: flex;
+  justify-content: center;
+}
+
+.chord-remove-btn {
+  padding: 6px 12px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.15s ease;
+}
+
+.chord-remove-btn:hover {
+  background: #c0392b;
 }
 
 /* Responsive */

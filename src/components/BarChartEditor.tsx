@@ -1,9 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import type { TextDirection } from '../types';
-import type { BarChartDocument, BarChartLine, MeasureLine, SectionLine } from '../types/barChart';
+import type { BarChartDocument, BarChartLine, MeasureLine, SectionLine, Measure } from '../types/barChart';
 import { createMeasureLine, createSectionLine, createEmptyMeasure } from '../types/barChart';
+import type { ChordDefinition } from '../data/chords';
 import MeasureLineComponent from './MeasureLineComponent';
 import SectionHeader from './SectionHeader';
+import ChordDropdown from './ChordDropdown';
 import '../styles/BarChartEditor.css';
 
 interface BarChartEditorProps {
@@ -29,13 +31,168 @@ const BarChartEditor: React.FC<BarChartEditorProps> = ({
 }) => {
   const [selectedMeasureId, setSelectedMeasureId] = useState<string | null>(null);
   const [selectedBeat, setSelectedBeat] = useState<1 | 2 | 3 | 4 | null>(null);
+  const [selectedColumn, setSelectedColumn] = useState<'left' | 'right' | null>(null);
+  const [showChordDropdown, setShowChordDropdown] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ x: 0, y: 0 });
+  const [expandedMeasureIds, setExpandedMeasureIds] = useState<Set<string>>(new Set());
+  const [isRightClickAction, setIsRightClickAction] = useState(false);
 
-  // Handle beat click
-  const handleBeatClick = useCallback((measureId: string, beatPosition: 1 | 2 | 3 | 4) => {
+  // Update a measure's beat with a new chord (defined first as other handlers depend on it)
+  const updateMeasureBeat = useCallback((
+    lines: BarChartLine[],
+    measureId: string,
+    beatPosition: 1 | 2 | 3 | 4,
+    chordSymbol: string | null
+  ): BarChartLine[] => {
+    return lines.map(line => {
+      if (line.type !== 'measures') return line;
+      
+      const measureLine = line as MeasureLine;
+      const measureIndex = measureLine.measures.findIndex(m => m.id === measureId);
+      if (measureIndex === -1) return line;
+
+      const newMeasures = [...measureLine.measures];
+      const measure = { ...newMeasures[measureIndex] };
+      const newBeats = [...measure.beats] as Measure['beats'];
+      
+      // Update the beat
+      const beatIndex = beatPosition - 1;
+      newBeats[beatIndex] = {
+        ...newBeats[beatIndex],
+        chord: chordSymbol,
+        isHold: false,
+      };
+      
+      // Update hold markers for subsequent beats
+      // A beat is "hold" if it has no chord but a previous beat in the measure has a chord
+      for (let i = beatIndex + 1; i < 4; i++) {
+        if (newBeats[i].chord) {
+          // Stop at the next chord
+          break;
+        }
+        // Check if any previous beat has a chord
+        let hasPreviousChord = false;
+        for (let j = 0; j <= i - 1; j++) {
+          if (newBeats[j].chord) {
+            hasPreviousChord = true;
+            break;
+          }
+        }
+        newBeats[i] = {
+          ...newBeats[i],
+          isHold: hasPreviousChord,
+        };
+      }
+      
+      // Also update hold markers for beats before this one if we cleared a chord
+      if (chordSymbol === null) {
+        // Recalculate all hold markers
+        let lastChordIndex = -1;
+        for (let i = 0; i < 4; i++) {
+          if (newBeats[i].chord) {
+            lastChordIndex = i;
+            newBeats[i] = { ...newBeats[i], isHold: false };
+          } else {
+            newBeats[i] = { ...newBeats[i], isHold: lastChordIndex >= 0 };
+          }
+        }
+      }
+      
+      measure.beats = newBeats;
+      newMeasures[measureIndex] = measure;
+      
+      return { ...measureLine, measures: newMeasures };
+    });
+  }, []);
+
+  // Handle beat click - opens chord dropdown
+  const handleBeatClick = useCallback((
+    measureId: string, 
+    beatPosition: 1 | 2 | 3 | 4, 
+    column: 'left' | 'right',
+    event: React.MouseEvent
+  ) => {
     setSelectedMeasureId(measureId);
     setSelectedBeat(beatPosition);
-    // TODO Phase 3: Open chord dropdown here
+    setSelectedColumn(column);
+    setIsRightClickAction(false);
+    
+    // Position dropdown near click
+    const rect = (event.target as HTMLElement).getBoundingClientRect();
+    setDropdownPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.bottom + 5
+    });
+    setShowChordDropdown(true);
   }, []);
+
+  // Handle beat right-click - remove chord directly
+  const handleBeatRightClick = useCallback((
+    measureId: string, 
+    beatPosition: 1 | 2 | 3 | 4, 
+    column: 'left' | 'right',
+    _event: React.MouseEvent
+  ) => {
+    // Directly remove the chord on right-click
+    if (column === 'left') {
+      onDocumentChange({
+        ...document,
+        leftLines: updateMeasureBeat(document.leftLines, measureId, beatPosition, null),
+      });
+    } else {
+      onDocumentChange({
+        ...document,
+        rightLines: updateMeasureBeat(document.rightLines, measureId, beatPosition, null),
+      });
+    }
+    
+    // After removing chord, collapse the measure if it now has 0-1 chords
+    setExpandedMeasureIds(prev => {
+      const next = new Set(prev);
+      next.delete(measureId);
+      return next;
+    });
+  }, [document, onDocumentChange, updateMeasureBeat]);
+
+  // Handle expand measure - force show all 4 beats
+  const handleExpandMeasure = useCallback((
+    measureId: string, 
+    _column: 'left' | 'right',
+    _event: React.MouseEvent
+  ) => {
+    setExpandedMeasureIds(prev => {
+      const next = new Set(prev);
+      next.add(measureId);
+      return next;
+    });
+  }, []);
+
+  // Close chord dropdown
+  const handleCloseDropdown = useCallback(() => {
+    setShowChordDropdown(false);
+    setSelectedMeasureId(null);
+    setSelectedBeat(null);
+    setSelectedColumn(null);
+  }, []);
+
+  // Handle chord selection from dropdown
+  const handleChordSelect = useCallback((chord: ChordDefinition) => {
+    if (!selectedMeasureId || !selectedBeat || !selectedColumn) return;
+
+    if (selectedColumn === 'left') {
+      onDocumentChange({
+        ...document,
+        leftLines: updateMeasureBeat(document.leftLines, selectedMeasureId, selectedBeat, chord.symbol),
+      });
+    } else {
+      onDocumentChange({
+        ...document,
+        rightLines: updateMeasureBeat(document.rightLines, selectedMeasureId, selectedBeat, chord.symbol),
+      });
+    }
+    
+    handleCloseDropdown();
+  }, [document, selectedMeasureId, selectedBeat, selectedColumn, onDocumentChange, updateMeasureBeat, handleCloseDropdown]);
 
   // Update lines with new measures per line count
   const updateLinesWithMeasuresCount = useCallback((lines: BarChartLine[], newValue: number): BarChartLine[] => {
@@ -151,10 +308,14 @@ const BarChartEditor: React.FC<BarChartEditorProps> = ({
           key={line.id}
           line={line as MeasureLine}
           onBeatClick={handleBeatClick}
+          onBeatRightClick={handleBeatRightClick}
+          onExpandMeasure={handleExpandMeasure}
           selectedMeasureId={selectedMeasureId}
           selectedBeat={selectedBeat}
           direction={direction}
           isLastLine={isLastLine}
+          column={column}
+          expandedMeasureIds={expandedMeasureIds}
         />
       );
     }
@@ -247,6 +408,15 @@ const BarChartEditor: React.FC<BarChartEditorProps> = ({
         {/* Right/Second Column - only shown when columnCount is 2 */}
         {columnCount === 2 && renderColumn('right', document.rightLines)}
       </div>
+
+      {/* Chord Dropdown - only for selecting/changing chords */}
+      {showChordDropdown && !isRightClickAction && (
+        <ChordDropdown
+          position={dropdownPosition}
+          onSelectChord={handleChordSelect}
+          onClose={handleCloseDropdown}
+        />
+      )}
     </div>
   );
 };

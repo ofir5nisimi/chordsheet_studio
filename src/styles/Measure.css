@@ -1,22 +1,39 @@
 /**
  * Measure Component Styles
+ * Supports two display modes:
+ * - Compact: For measures with 0-1 chords (single chord spanning measure)
+ * - Expanded: For measures with 2+ chords (4 beat positions)
  */
 
 .measure {
   display: flex;
   align-items: stretch;
-  height: 42px;
-  flex: 1;
-  min-width: 0;
+  min-height: 38px;
   position: relative;
   background-color: #ffffff;
+  overflow: visible;
 }
 
-/* Bar lines */
+/* Compact measures take minimum space needed */
+.measure.compact {
+  flex: 0 1 auto;
+  min-width: 50px;
+}
+
+/* Expanded measures (multiple chords) take more space */
+.measure.expanded {
+  flex: 1 1 auto;
+  min-width: 140px;
+}
+
+/* Bar lines - ensure always visible */
 .bar-line {
   width: 2px;
+  min-width: 2px;
   background-color: #333;
   flex-shrink: 0;
+  z-index: 10;
+  position: relative;
 }
 
 .bar-line-left {
@@ -31,6 +48,7 @@
 .bar-line-right {
   position: relative;
   display: block;
+  z-index: 2;
 }
 
 /* Double bar line for ending measures */
@@ -50,14 +68,118 @@
   background-color: #333;
 }
 
-/* Beats container */
+/* Beats container - shared styles */
 .beats-container {
   display: flex;
   flex: 1;
-  min-width: 0;
   align-items: stretch;
   border-top: 1px solid rgba(0, 0, 0, 0.15);
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  min-height: 36px;
+  min-width: 0; /* Allow container to shrink */
+  overflow: visible;
+  margin: 0 1px; /* Small gap from bar lines */
+}
+
+/* Compact mode - single chord spanning the measure */
+.beats-container.compact-mode {
+  cursor: pointer;
+  padding: 3px;
+  position: relative;
+}
+
+.compact-chord {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-width: 40px;
+  padding: 3px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 4px;
+  transition: background-color 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+}
+
+.compact-chord.has-chord {
+  color: #2980b9;
+  padding-right: 24px; /* Make room for expand button */
+}
+
+.compact-chord.empty {
+  background-color: #f8f8f8;
+  color: #aaa;
+  border: 1px dashed #ddd;
+}
+
+.compact-chord .empty-hint {
+  font-size: 18px;
+  font-weight: 300;
+  opacity: 0.5;
+}
+
+.compact-chord.selected,
+.beats-container.compact-mode:focus .compact-chord {
+  box-shadow: 0 0 0 2px #2196f3;
+  outline: none;
+}
+
+.beats-container.compact-mode:hover .compact-chord.empty {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+}
+
+.beats-container.compact-mode:hover .compact-chord.has-chord {
+  background-color: transparent;
+}
+
+/* Expand button - appears on hover when measure has 1 chord */
+.expand-measure-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: rgba(21, 101, 192, 0.15);
+  color: #1565c0;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s, background-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.beats-container.compact-mode:hover .expand-measure-btn {
+  opacity: 1;
+}
+
+.expand-measure-btn:hover {
+  background: rgba(21, 101, 192, 0.3);
+}
+
+/* RTL support for expand button */
+.measure.rtl .expand-measure-btn {
+  right: auto;
+  left: 6px;
+}
+
+.measure.rtl .compact-chord.has-chord {
+  padding-left: 24px;
+  padding-right: 8px;
+}
+
+/* Expanded mode - 4 beat positions */
+.beats-container.expanded-mode {
+  gap: 1px;
 }
 
 /* Hover effect on measure */
@@ -98,7 +220,7 @@
 /* Print styles */
 @media print {
   .measure {
-    height: 38px;
+    min-height: 34px;
   }
   
   .bar-line {
@@ -113,6 +235,19 @@
 /* Responsive */
 @media (max-width: 768px) {
   .measure {
-    height: 36px;
+    min-height: 32px;
+  }
+  
+  .measure.compact {
+    min-width: 45px;
+  }
+  
+  .measure.expanded {
+    min-width: 100px;
+  }
+  
+  .compact-chord {
+    font-size: 12px;
+    padding: 2px 4px;
   }
 }

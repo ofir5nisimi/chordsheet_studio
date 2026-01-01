@@ -107,19 +107,12 @@ function App() {
     }
   }, [barChartDocument]);
 
-  // Handle mode change - adjust column count if needed
+  // Handle mode change - each mode has its own column count
   const handleModeChange = useCallback((newMode: AppMode) => {
     setMode(newMode);
-    // Adjust column count for mode compatibility
-    if (newMode === 'barChart') {
-      // Bar Chart mode only supports 1 or 2 columns
-      // If currently at 3 columns, switch to 2
-      setColumnCount(prev => prev === 3 ? 2 : prev);
-    } else {
-      // Lyrics mode only supports 2 or 3 columns
-      // If currently at 1 column, switch to 2
-      setColumnCount(prev => prev === 1 ? 2 : prev);
-    }
+    // No need to adjust column counts - each mode uses its own:
+    // - Lyrics mode uses `columnCount` state (2 or 3)
+    // - Bar Chart mode uses `barChartDocument.columns` (1 or 2)
   }, []);
 
   // Undo/Redo history
@@ -294,11 +287,14 @@ function App() {
 
   // Toggle column count - different behavior for each mode
   // For Lyrics mode: 2 ↔ 3 with content redistribution
-  // For Bar Chart mode: 1 ↔ 2 (simple toggle)
+  // For Bar Chart mode: 1 ↔ 2 (uses barChartDocument.columns)
   const toggleColumnCount = useCallback(() => {
     if (mode === 'barChart') {
-      // Bar Chart mode: simple toggle between 1 and 2
-      setColumnCount((prev) => prev === 1 ? 2 : 1);
+      // Bar Chart mode: toggle barChartDocument.columns between 1 and 2
+      setBarChartDocument(prev => ({
+        ...prev,
+        columns: prev.columns === 1 ? 2 : 1,
+      }));
     } else {
       // Lyrics mode: 2 ↔ 3 with content redistribution
       setColumnCount((prev) => {
@@ -845,7 +841,7 @@ function App() {
                     document={barChartDocument}
                     onDocumentChange={setBarChartDocument}
                     direction={direction}
-                    columnCount={columnCount === 3 ? 2 : columnCount}
+                    columnCount={barChartDocument.columns}
                     fontSize={fontSize}
                   />
                 </div>
@@ -878,11 +874,14 @@ function App() {
           <div className="sidebar-section">
             <span className="sidebar-label">View</span>
             <button
-              className={`sidebar-button ${(mode === 'barChart' && columnCount === 2) || (mode === 'lyrics' && columnCount === 3) ? 'active' : ''}`}
+              className={`sidebar-button ${(mode === 'barChart' && barChartDocument.columns === 2) || (mode === 'lyrics' && columnCount === 3) ? 'active' : ''}`}
               onClick={toggleColumnCount}
               title={mode === 'barChart' ? 'Toggle columns (1↔2)' : 'Toggle 3rd Column'}
             >
-              {columnCount === 1 ? '⊞ 1 Col' : columnCount === 2 ? '⊞ 2 Cols' : '⊟ 3 Cols'}
+              {mode === 'barChart' 
+                ? (barChartDocument.columns === 1 ? '⊞ 1 Col' : '⊞ 2 Cols')
+                : (columnCount === 2 ? '⊞ 2 Cols' : '⊟ 3 Cols')
+              }
             </button>
             <button
               className={`sidebar-button ${showColumnSeparators ? 'active' : ''}`}
