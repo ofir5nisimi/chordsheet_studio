@@ -160,6 +160,7 @@ function makeSearchable(str: string): string {
 
 /**
  * Search chords by query string
+ * Prioritizes exact symbol matches, then symbols starting with query
  * Supports both ASCII (#, b) and Unicode (♯, ♭) accidentals
  */
 export function searchChords(query: string): ChordDefinition[] {
@@ -170,15 +171,32 @@ export function searchChords(query: string): ChordDefinition[] {
   // Normalize the query to lowercase and convert to searchable ASCII format
   const normalizedQuery = makeSearchable(query.trim());
   
-  return CHORD_DATABASE.filter(chord => {
-    // Make chord symbol and name searchable (convert ♯ to #, ♭ to b)
+  // Categorize matches by priority
+  const exactMatches: ChordDefinition[] = [];      // Exact symbol match
+  const startsWithMatches: ChordDefinition[] = []; // Symbol starts with query
+  const rootMatches: ChordDefinition[] = [];       // Root note matches query
+  
+  for (const chord of CHORD_DATABASE) {
     const searchableSymbol = makeSearchable(chord.symbol);
-    const searchableName = makeSearchable(chord.name);
+    const searchableRoot = makeSearchable(chord.root);
     
-    const symbolMatch = searchableSymbol.includes(normalizedQuery);
-    const nameMatch = searchableName.includes(normalizedQuery);
-    return symbolMatch || nameMatch;
-  });
+    // Priority 1: Exact match on symbol
+    if (searchableSymbol === normalizedQuery) {
+      exactMatches.push(chord);
+    }
+    // Priority 2: Symbol starts with query
+    else if (searchableSymbol.startsWith(normalizedQuery)) {
+      startsWithMatches.push(chord);
+    }
+    // Priority 3: Root note exactly matches query (for single letter like "G")
+    else if (searchableRoot === normalizedQuery || searchableRoot.startsWith(normalizedQuery)) {
+      rootMatches.push(chord);
+    }
+    // NO LONGER matching partial name/description - this caused the "G" matching "Augmented" issue
+  }
+  
+  // Return results in priority order
+  return [...exactMatches, ...startsWithMatches, ...rootMatches];
 }
 
 /**

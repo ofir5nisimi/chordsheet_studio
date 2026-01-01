@@ -16,7 +16,7 @@
 .a4-page {
   width: 794px;
   min-height: 1123px;
-  height: 1193px; /* Increased to better match actual print area */
+  height: 1350px; /* Increased to better match actual print area */
   background-color: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   position: relative;
@@ -237,7 +237,7 @@
     width: 100%;
     height: auto;
     min-height: auto;
-    padding: 15mm 15mm;
+    padding: 20mm 15mm;
     overflow: visible;
     page-break-inside: avoid;
     break-inside: avoid;

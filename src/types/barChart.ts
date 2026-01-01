@@ -41,15 +41,26 @@ export interface SectionLine {
 /** Union type for all line types in Bar Chart mode */
 export type BarChartLine = MeasureLine | SectionLine;
 
+/** Row layout mode */
+export type RowLayout = 'full' | 'split';
+
+/** A row in the bar chart - can be full-width or split into 2 columns */
+export interface BarChartRow {
+  id: string;
+  layout: RowLayout;
+  // For 'full' layout: only leftLine is used
+  // For 'split' layout: both leftLine and rightLine are used
+  leftLine: BarChartLine | null;
+  rightLine: BarChartLine | null;
+}
+
 /** Complete Bar Chart document */
 export interface BarChartDocument {
   id: string;
   title: string;
   artist?: string;
   direction: TextDirection;
-  columns: 1 | 2;
-  leftLines: BarChartLine[];
-  rightLines: BarChartLine[];
+  rows: BarChartRow[];
   measuresPerLine: number;
 }
 
@@ -98,15 +109,33 @@ export function createMeasureLine(measuresPerLine: number = 4): MeasureLine {
   };
 }
 
+/** Helper function to create a full-width row */
+export function createFullWidthRow(line: BarChartLine): BarChartRow {
+  return {
+    id: `row-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    layout: 'full',
+    leftLine: line,
+    rightLine: null,
+  };
+}
+
+/** Helper function to create a split row */
+export function createSplitRow(leftLine: BarChartLine | null = null, rightLine: BarChartLine | null = null): BarChartRow {
+  return {
+    id: `row-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    layout: 'split',
+    leftLine,
+    rightLine,
+  };
+}
+
 /** Helper function to create a default Bar Chart document */
 export function createDefaultBarChartDocument(): BarChartDocument {
   return {
     id: `barchart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     title: '',
     direction: 'ltr',
-    columns: 2,
-    leftLines: [],
-    rightLines: [],
+    rows: [],
     measuresPerLine: 4,
   };
 }

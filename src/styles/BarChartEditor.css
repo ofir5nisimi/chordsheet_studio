@@ -1,5 +1,6 @@
 /**
  * BarChartEditor Component Styles
+ * New row-based architecture where each row can be full-width or split
  */
 
 .bar-chart-editor {
@@ -13,18 +14,57 @@
 /* Toolbar always stays LTR */
 .bar-chart-toolbar {
   direction: ltr;
-}
-
-/* Toolbar styles */
-.bar-chart-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding: 8px 4px;
+  padding: 6px 4px;
   border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
   flex-wrap: wrap;
+}
+
+/* Page usage indicator */
+.page-usage-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #666;
+}
+
+.page-usage-indicator.overflow {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.usage-bar {
+  flex: 1;
+  max-width: 150px;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.usage-fill {
+  height: 100%;
+  background: #27ae60;
+  border-radius: 3px;
+  transition: width 0.2s ease;
+}
+
+.page-usage-indicator.overflow .usage-fill {
+  background: #e74c3c;
+}
+
+.usage-text {
+  white-space: nowrap;
+  font-weight: 500;
 }
 
 .toolbar-group {
@@ -84,166 +124,342 @@
   color: #333;
 }
 
-.toolbar-actions {
-  gap: 8px;
-}
-
-.toolbar-btn {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.add-section-btn {
-  background: #8e44ad;
-  color: white;
-}
-
-.add-section-btn:hover {
-  background: #7d3c98;
-}
-
-.add-measures-btn {
-  background: #27ae60;
-  color: white;
-}
-
-.add-measures-btn:hover {
-  background: #229954;
-}
-
-/* Columns container - like A4Page columns layout */
-.bar-chart-columns {
+/* Rows container */
+.bar-chart-rows {
   display: flex;
-  flex: 1;
-  gap: 16px;
+  flex-direction: column;
+  gap: 4px;
   padding: 0 4px;
 }
 
-.bar-chart-columns.columns-1 {
-  flex-direction: column;
-}
-
-.bar-chart-columns.columns-2 {
-  flex-direction: row;
-}
-
-/* RTL adjustments for columns */
-.bar-chart-columns.rtl {
-  flex-direction: row-reverse;
-}
-
-.bar-chart-columns.columns-1.rtl {
-  flex-direction: column;
-}
-
-/* Individual column */
-.bar-chart-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  border-left: 1px solid #e0e0e0;
-  padding-left: 12px;
-  overflow: visible;
-}
-
-.bar-chart-column.left {
-  border-left: none;
-  padding-left: 0;
-}
-
-.bar-chart-columns.columns-1 .bar-chart-column {
-  border-left: none;
-  padding-left: 0;
-}
-
-/* Column content area */
-.column-content {
-  flex: 1;
-  min-height: 100px;
-  overflow: visible;
-}
-
-/* Column action buttons - at top of column */
-.column-actions {
-  display: flex;
-  gap: 8px;
-  padding: 8px 0;
-  margin-bottom: 12px;
-  border-bottom: 1px dashed #e0e0e0;
-}
-
-.column-btn {
-  flex: 1;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.column-btn.add-section-btn {
-  background: #8e44ad;
-  color: white;
-}
-
-.column-btn.add-section-btn:hover {
-  background: #7d3c98;
-}
-
-.column-btn.add-measures-btn {
-  background: #27ae60;
-  color: white;
-}
-
-.column-btn.add-measures-btn:hover {
-  background: #229954;
-}
-
 /* Empty state */
-.bar-chart-empty {
+.bar-chart-empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
   text-align: center;
   color: #666;
-  min-height: 150px;
 }
 
 .empty-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
+  font-size: 64px;
+  margin-bottom: 16px;
   opacity: 0.5;
 }
 
-.bar-chart-empty p {
-  margin: 0 0 8px 0;
-  font-size: 14px;
+.bar-chart-empty-state p {
+  margin: 0 0 24px 0;
+  font-size: 16px;
   color: #666;
 }
 
-.empty-hint {
-  font-size: 12px;
-  color: #999;
-  font-style: italic;
+.initial-add-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
 }
 
-/* Debug info - remove in production */
-.debug-info {
-  margin-top: auto;
-  padding: 8px;
-  font-size: 10px;
-  color: #999;
-  background: #f5f5f5;
+.initial-add-btn {
+  padding: 8px 16px;
+  border: none;
   border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.initial-add-btn.add-section-btn {
+  background: #8e44ad;
+  color: white;
+}
+
+.initial-add-btn.add-section-btn:hover {
+  background: #7d3c98;
+}
+
+.initial-add-btn.add-measures-btn {
+  background: #27ae60;
+  color: white;
+}
+
+.initial-add-btn.add-measures-btn:hover {
+  background: #229954;
+}
+
+/* Add row group - groups buttons by type */
+.add-row-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+
+.add-row-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Top add buttons */
+.top-add-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 4px 0;
+  margin-bottom: 4px;
+  border-bottom: 1px dashed #e0e0e0;
+  flex-wrap: wrap;
+}
+
+/* Single row */
+.bar-chart-row {
+  position: relative;
+  padding: 2px 0;
+  padding-left: 40px; /* Space for controls */
+}
+
+/* Add extra spacing between full-width and split rows */
+.bar-chart-row.full-width + .bar-chart-row.split,
+.bar-chart-row.split + .bar-chart-row.full-width {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.bar-chart-row:hover {
+  background-color: #fafafa;
+}
+
+/* Row controls - shown on left side on hover */
+.row-controls {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.bar-chart-row:hover .row-controls {
+  opacity: 1;
+}
+
+.row-control-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.toggle-layout-btn {
+  background: #3498db;
+  color: white;
+}
+
+.toggle-layout-btn:hover {
+  background: #2980b9;
+}
+
+.toggle-layout-btn.is-full {
+  background: #9b59b6;
+}
+
+.toggle-layout-btn.is-full:hover {
+  background: #8e44ad;
+}
+
+.delete-row-btn {
+  background: #e74c3c;
+  color: white;
+}
+
+.delete-row-btn:hover {
+  background: #c0392b;
+}
+
+/* Row content layout */
+.row-content {
+  display: flex;
+  gap: 16px;
+}
+
+.row-content.rtl {
+  flex-direction: row-reverse;
+}
+
+/* Full width cell */
+.full-width-cell {
+  flex: 1;
+}
+
+/* Split cells */
+.split-cell {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.split-cell.left {
+  border-right: 1px solid #e0e0e0;
+  padding-right: 8px;
+}
+
+.split-cell.right {
+  padding-left: 8px;
+}
+
+.row-content.rtl .split-cell.left {
+  border-right: none;
+  border-left: 1px solid #e0e0e0;
+  padding-right: 0;
+  padding-left: 8px;
+}
+
+.row-content.rtl .split-cell.right {
+  padding-left: 0;
+  padding-right: 8px;
+}
+
+/* Line content wrapper */
+.line-content {
+  position: relative;
+}
+
+/* Content delete button - for split rows */
+.content-delete-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: #e74c3c;
+  color: white;
+  font-size: 10px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 5;
+}
+
+.line-content:hover .content-delete-btn {
+  opacity: 1;
+}
+
+.content-delete-btn:hover {
+  background: #c0392b;
+}
+
+/* Empty slot - placeholder with add buttons */
+.empty-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+  gap: 8px;
+  padding: 12px;
+}
+
+.slot-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+  max-width: 120px;
+}
+
+.slot-btn.add-section-btn {
+  background: #8e44ad;
+  color: white;
+}
+
+.slot-btn.add-section-btn:hover {
+  background: #7d3c98;
+}
+
+.slot-btn.add-measures-btn {
+  background: #27ae60;
+  color: white;
+}
+
+.slot-btn.add-measures-btn:hover {
+  background: #229954;
+}
+
+/* Add row buttons - shown below each row on hover */
+.add-row-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 6px 0;
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  flex-wrap: wrap;
+}
+
+.bar-chart-row:hover .add-row-buttons {
+  opacity: 1;
+}
+
+.add-row-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.add-row-btn.add-section-btn {
+  background: #8e44ad;
+  color: white;
+}
+
+.add-row-btn.add-section-btn:hover {
+  background: #7d3c98;
+}
+
+.add-row-btn.add-measures-btn {
+  background: #27ae60;
+  color: white;
+}
+
+.add-row-btn.add-measures-btn:hover {
+  background: #229954;
 }
 
 /* Print styles */
@@ -252,36 +468,76 @@
     display: none;
   }
   
-  .column-actions {
-    display: none;
+  .page-usage-indicator {
+    display: none !important;
   }
   
-  .bar-chart-columns {
-    padding: 0;
+  .row-controls {
+    display: none !important;
   }
-}
-
-/* Chord remove button */
-.chord-remove-overlay {
-  display: flex;
-  justify-content: center;
-}
-
-.chord-remove-btn {
-  padding: 6px 12px;
-  background: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.15s ease;
-}
-
-.chord-remove-btn:hover {
-  background: #c0392b;
+  
+  .add-row-buttons {
+    display: none !important;
+  }
+  
+  .top-add-buttons {
+    display: none !important;
+  }
+  
+  .content-delete-btn {
+    display: none !important;
+  }
+  
+  .empty-slot {
+    display: none !important;
+  }
+  
+  .bar-chart-row {
+    padding-left: 0;
+  }
+  
+  .bar-chart-row:hover {
+    background-color: transparent;
+  }
+  
+  /* Preserve 2-column layout for split rows in print */
+  .row-content {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 16px !important;
+  }
+  
+  .row-content.rtl {
+    flex-direction: row-reverse !important;
+  }
+  
+  .split-cell {
+    flex: 1 !important;
+  }
+  
+  .split-cell.left {
+    border-right: 1px solid #ccc !important;
+    border-bottom: none !important;
+    padding-right: 8px !important;
+    padding-bottom: 0 !important;
+  }
+  
+  .split-cell.right {
+    padding-left: 8px !important;
+    padding-top: 0 !important;
+  }
+  
+  .row-content.rtl .split-cell.left {
+    border-right: none !important;
+    border-left: 1px solid #ccc !important;
+    padding-right: 0 !important;
+    padding-left: 8px !important;
+  }
+  
+  .row-content.rtl .split-cell.right {
+    padding-left: 0 !important;
+    padding-right: 8px !important;
+  }
 }
 
 /* Responsive */
@@ -291,8 +547,24 @@
     align-items: flex-start;
   }
   
-  .toolbar-actions {
-    width: 100%;
-    justify-content: flex-end;
+  .initial-add-buttons {
+    flex-direction: column;
+  }
+  
+  .row-content {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .split-cell.left {
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+    padding-right: 0;
+    padding-bottom: 8px;
+  }
+  
+  .split-cell.right {
+    padding-left: 0;
+    padding-top: 8px;
   }
 }

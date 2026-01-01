@@ -28,8 +28,8 @@
 
 /* Bar lines - ensure always visible */
 .bar-line {
-  width: 2px;
-  min-width: 2px;
+  width: 1px;
+  min-width: 1px;
   background-color: #333;
   flex-shrink: 0;
   z-index: 10;
@@ -41,8 +41,10 @@
   display: block;
 }
 
+/* Hide left bar line for non-first measures */
 .measure:not(.first) .bar-line-left {
   width: 0;
+  min-width: 0;
 }
 
 .bar-line-right {
@@ -53,18 +55,19 @@
 
 /* Double bar line for ending measures */
 .bar-line-right.double {
-  width: 4px;
-  background: linear-gradient(to right, #333 2px, transparent 2px, transparent 3px, #333 3px);
+  width: 3px;
+  min-width: 3px;
+  background: linear-gradient(to right, #333 1px, transparent 1px, transparent 2px, #333 2px);
 }
 
 /* Alternative double bar style: thin then thick */
 .bar-line-right.double::after {
   content: '';
   position: absolute;
-  right: -4px;
+  right: -3px;
   top: 0;
   bottom: 0;
-  width: 3px;
+  width: 2px;
   background-color: #333;
 }
 
